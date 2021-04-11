@@ -194,6 +194,9 @@ int main(int argc, char **argv) {
 		return 1;
 	} else {
 		// graphics mode
+		AllocConsole();
+		freopen("CONOUT$", "w", stdout);
+
 		traceUI=new TraceUI();
 		theRayTracer=new RayTracer();
 

@@ -85,7 +85,11 @@ public:
 	{
 		return n[0]*b[0] + n[1]*b[1] + n[2]*b[2];
 	}
-
+	// element wise multiply
+	vec3f multiply(const vec3f& b) const
+	{
+		return vec3f(n[0] * b[0], n[1] * b[1], n[2] * b[2]);
+	}
 	double length_squared() const
 		{ return n[0]*n[0] + n[1]*n[1] + n[2]*n[2]; }
 	double length() const

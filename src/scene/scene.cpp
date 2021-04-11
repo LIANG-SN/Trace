@@ -92,8 +92,7 @@ bool Geometry::intersect(const ray&r, isect&i) const
 		return true;
     } else {
         return false;
-    }
-    
+    } 
 }
 
 bool Geometry::intersectLocal( const ray& r, isect& i ) const

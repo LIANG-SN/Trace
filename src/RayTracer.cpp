@@ -8,7 +8,11 @@
 #include "scene/ray.h"
 #include "fileio/read.h"
 #include "fileio/parse.h"
+#include "ui/TraceUI.h"
+#include <stack>
 
+extern TraceUI* traceUI;
+stack<double> refrac_stack;
 // Trace a top-level ray through normalized window coordinates (x,y)
 // through the projection plane, and out into the scene.  All we do is
 // enter the main ray-tracing method, getting things started by plugging
@@ -17,6 +21,8 @@ vec3f RayTracer::trace( Scene *scene, double x, double y )
 {
     ray r( vec3f(0,0,0), vec3f(0,0,0) );
     scene->getCamera()->rayThrough( x,y,r );
+	while (!refrac_stack.empty())
+		refrac_stack.pop();
 	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ).clamp();
 }
 
@@ -25,8 +31,9 @@ vec3f RayTracer::trace( Scene *scene, double x, double y )
 vec3f RayTracer::traceRay( Scene *scene, const ray& r, 
 	const vec3f& thresh, int depth )
 {
-	isect i;
 
+	isect i;
+	
 	if( scene->intersect( r, i ) ) {
 		// YOUR CODE HERE
 
@@ -40,7 +47,55 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// rays.
 
 		const Material& m = i.getMaterial();
-		return m.shade(scene, r, i);
+		vec3f rayDirection = r.getDirection().normalize();
+		vec3f N = i.N.normalize();
+		// shade
+		vec3f shade = m.shade(scene, r, i);
+		if (depth >= traceUI->getDepth())
+			return shade;
+		vec3f finalI = shade;
+		// reflection
+		if (refrac_stack.empty())
+		{
+		    vec3f reflectDirection = 
+		    	 - (2 * (rayDirection.dot(N)) * N - rayDirection).normalize();
+		    ray reflectRay(r.at(i.t), reflectDirection);
+		    vec3f reflect = traceRay(scene, reflectRay,  thresh, depth + 1);
+		    finalI += m.kr.multiply(reflect);
+		}
+		// refraction
+		if (m.kt[0] != 0 || m.kt[1] != 0 || m.kt[2] != 0)
+		{
+		    double n_i, n_t;
+		    if (rayDirection.dot(N) <= 0) // enter an object
+		    {
+				n_i = refrac_stack.empty() ? 1 : refrac_stack.top();
+				n_t = m.index;
+				refrac_stack.push(n_t);
+		    }
+		    else // exit an object
+		    {
+		    	n_i = m.index;
+				refrac_stack.pop();
+		    	n_t = refrac_stack.empty() ? 1 : refrac_stack.top();
+		    	N *= -1;
+		    }
+		    double n = n_i / n_t;
+		    double cos_theta_i = N.dot(-rayDirection);
+		    if (1 - n * n * (1 - cos_theta_i * cos_theta_i) > 0)
+		    {
+		    	double cos_theta_t = sqrt(1 - n * n * (1 - cos_theta_i * cos_theta_i));
+		    	vec3f refracDir = ((n * cos_theta_i - cos_theta_t) * N - n * -rayDirection).normalize();
+		    	ray refracRay(r.at(i.t), refracDir);
+		    	vec3f refrac = traceRay(scene, refracRay, thresh, depth + 1);
+		    	finalI += m.kt.multiply(refrac);
+		    }
+		    finalI[0] = min(finalI[0], thresh[0]);
+		    finalI[1] = min(finalI[1], thresh[1]);
+		    finalI[2] = min(finalI[2], thresh[2]);
+
+		}
+		return finalI;
 	
 	} else {
 		// No intersection.  This ray travels to infinity, so we color
