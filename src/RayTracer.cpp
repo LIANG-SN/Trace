@@ -23,7 +23,10 @@ vec3f RayTracer::trace( Scene *scene, double x, double y )
     scene->getCamera()->rayThrough( x,y,r );
 	while (!refrac_stack.empty())
 		refrac_stack.pop();
-	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ).clamp();
+	double thres = traceUI->getThreshold();
+
+
+	return traceRay( scene, r, vec3f(thres, thres, thres), 0 ).clamp();
 }
 
 // Do recursive ray tracing!  You'll want to insert a lot of code here
@@ -54,6 +57,10 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		if (depth >= traceUI->getDepth())
 			return shade;
 		vec3f finalI = shade;
+
+		if (shade[0] < thresh[0] && shade[1] < thresh[1] && shade[2] < thresh[2])
+			return finalI;
+
 		// reflection
 		if (refrac_stack.empty())
 		{
@@ -61,7 +68,11 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		    	 - (2 * (rayDirection.dot(N)) * N - rayDirection).normalize();
 		    ray reflectRay(r.at(i.t), reflectDirection);
 		    vec3f reflect = traceRay(scene, reflectRay,  thresh, depth + 1);
-		    finalI += m.kr.multiply(reflect);
+			vec3f kr_reflect = m.kr.multiply(reflect);
+			if (kr_reflect[0] > thresh[0] || kr_reflect[1] > thresh[1] || kr_reflect[2] > thresh[2])
+				finalI += m.kr.multiply(reflect);
+			else
+				return finalI;
 		}
 		// refraction
 		if (m.kt[0] != 0 || m.kt[1] != 0 || m.kt[2] != 0)
@@ -88,13 +99,15 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		    	vec3f refracDir = ((n * cos_theta_i - cos_theta_t) * N - n * -rayDirection).normalize();
 		    	ray refracRay(r.at(i.t), refracDir);
 		    	vec3f refrac = traceRay(scene, refracRay, thresh, depth + 1);
-		    	finalI += m.kt.multiply(refrac);
+				vec3f kt_refrac = m.kt.multiply(refrac);
+				if (kt_refrac[0] > thresh[0] || kt_refrac[1] > thresh[1] || kt_refrac[2] > thresh[2])
+					finalI += m.kt.multiply(refrac);
+				else
+					return finalI;
 		    }
-		    finalI[0] = min(finalI[0], thresh[0]);
-		    finalI[1] = min(finalI[1], thresh[1]);
-		    finalI[2] = min(finalI[2], thresh[2]);
 
 		}
+
 		return finalI;
 	
 	} else {

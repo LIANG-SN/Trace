@@ -80,6 +80,9 @@ vec3f PointLight::shadowAttenuation(const vec3f& P) const
 		}
 		else
 			atten = { 1, 1, 1 };
+
+		if(i.t< RAY_EPSILON)
+			atten = { 1, 1, 1 };
 	}
 	return atten;
 }
