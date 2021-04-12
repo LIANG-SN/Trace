@@ -34,6 +34,14 @@ public:
 
 	TraceGLWindow*		m_traceGlWindow;
 
+	Fl_Check_Button* m_visualize_check;
+	Fl_Check_Button* m_jittering_check;
+	Fl_Check_Button* m_supersample_check;
+	Fl_Check_Button* m_adaptive_check;
+	Fl_Slider* m_sample_slider;
+	Fl_Slider* m_adaptive_thresh_slider;
+
+
 	// member functions
 	void show();
 
@@ -41,6 +49,13 @@ public:
 
 	int			getSize();
 	int			getDepth();
+
+	bool show_sample_visualize{ false };
+	bool jittering{ false };
+	bool super_sampling{ false };
+	bool adaptive_super_sampling{ false };
+	int sample_per_pixel{ 5 };
+	double adaptive_thresh{ 0.1 };
 
 private:
 	RayTracer*	raytracer;
@@ -65,6 +80,13 @@ private:
 
 	static void cb_render(Fl_Widget* o, void* v);
 	static void cb_stop(Fl_Widget* o, void* v);
+
+	static void	cb_sample_visualize(Fl_Widget* o, void* v);
+	static void	cb_jittering_check(Fl_Widget* o, void* v);
+	static void	cb_super_sample_check(Fl_Widget* o, void* v);
+	static void	cb_adaptive_supersample_check(Fl_Widget* o, void* v);
+	static void cb_sample_slides(Fl_Widget* o, void* v);
+	static void cb_adaptive_thresh_slides(Fl_Widget* o, void* v);
 };
 
 #endif

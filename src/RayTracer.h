@@ -17,17 +17,23 @@ public:
 
 
 	void getBuffer( unsigned char *&buf, int &w, int &h );
+	void getSampleBuffer(unsigned char*& buf, int& w, int& h);
 	double aspectRatio();
 	void traceSetup( int w, int h );
 	void traceLines( int start = 0, int stop = 10000000 );
 	void tracePixel( int i, int j );
+	vec3f RayTracer::adaptiveSample(double center_x, double center_y,
+		double range_x, double range_y, int& num_samples);
 
 	bool loadScene( char* fn );
 
 	bool sceneLoaded();
 
+	// bool sample_visualize();
+
 private:
 	unsigned char *buffer;
+	unsigned char* visualize_sample_buffer;
 	int buffer_width, buffer_height;
 	int bufferSize;
 	Scene *scene;
