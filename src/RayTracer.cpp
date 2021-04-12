@@ -17,7 +17,7 @@ stack<double> refrac_stack;
 // through the projection plane, and out into the scene.  All we do is
 // enter the main ray-tracing method, getting things started by plugging
 // in an initial ray weight of (0.0,0.0,0.0) and an initial recursion depth of 0.
-vec3f RayTracer::trace( Scene *scene, double x, double y )
+vec3f RayTracer::trace( Scene *scene, double x, double y,int i,int j )
 {
     ray r( vec3f(0,0,0), vec3f(0,0,0) );
     scene->getCamera()->rayThrough( x,y,r );
@@ -26,13 +26,13 @@ vec3f RayTracer::trace( Scene *scene, double x, double y )
 	double thres = traceUI->getThreshold();
 
 
-	return traceRay( scene, r, vec3f(thres, thres, thres), 0 ).clamp();
+	return traceRay( scene, r, vec3f(thres, thres, thres), 0 , i, j ).clamp();
 }
 
 // Do recursive ray tracing!  You'll want to insert a lot of code here
 // (or places called from here) to handle reflection, refraction, etc etc.
 vec3f RayTracer::traceRay( Scene *scene, const ray& r, 
-	const vec3f& thresh, int depth )
+	const vec3f& thresh, int depth, int x,int y )
 {
 
 	isect i;
@@ -67,7 +67,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		    vec3f reflectDirection = 
 		    	 - (2 * (rayDirection.dot(N)) * N - rayDirection).normalize();
 		    ray reflectRay(r.at(i.t), reflectDirection);
-		    vec3f reflect = traceRay(scene, reflectRay,  thresh, depth + 1);
+		    vec3f reflect = traceRay(scene, reflectRay,  thresh, depth + 1,x,y);
 			vec3f kr_reflect = m.kr.multiply(reflect);
 			if (kr_reflect[0] > thresh[0] || kr_reflect[1] > thresh[1] || kr_reflect[2] > thresh[2])
 				finalI += m.kr.multiply(reflect);
@@ -98,7 +98,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		    	double cos_theta_t = sqrt(1 - n * n * (1 - cos_theta_i * cos_theta_i));
 		    	vec3f refracDir = ((n * cos_theta_i - cos_theta_t) * N - n * -rayDirection).normalize();
 		    	ray refracRay(r.at(i.t), refracDir);
-		    	vec3f refrac = traceRay(scene, refracRay, thresh, depth + 1);
+		    	vec3f refrac = traceRay(scene, refracRay, thresh, depth + 1,x,y);
 				vec3f kt_refrac = m.kt.multiply(refrac);
 				if (kt_refrac[0] > thresh[0] || kt_refrac[1] > thresh[1] || kt_refrac[2] > thresh[2])
 					finalI += m.kt.multiply(refrac);
@@ -114,7 +114,41 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// No intersection.  This ray travels to infinity, so we color
 		// it according to the background color, which in this (simple) case
 		// is just black.
+		if (m_isBackground)
+		{
+			if (depth == 0)
+			{
+				vec3f light = vec3f();
+				light[0] = *(m_nBackground + (x * m_nBackground_width / buffer_width
+					+ y  * m_nBackground_width / buffer_width * m_nBackground_width) * 3 + 0) / 255.0;
+				light[1] = *(m_nBackground + (x * m_nBackground_width / buffer_width
+					+ y * m_nBackground_width / buffer_width * m_nBackground_width) * 3 + 1) / 255.0;
+				light[2] = *(m_nBackground + (x * m_nBackground_width / buffer_width
+					+ y * m_nBackground_width / buffer_width * m_nBackground_width) * 3 + 2) / 255.0;
+				return light;
+			}
+			else if(depth <= traceUI->getDepth()){
+				float v = (r.getDirection().normalize() * scene->getCamera()->getLook().normalize());
 
+					vec3f project_plane = r.getDirection().normalize()-v * scene->getCamera()->getLook().normalize();
+					float x_projection = project_plane * scene->getCamera()->getU();
+					float y_projection = project_plane * scene->getCamera()->getV();
+					float x_ratio = abs(x_projection) * project_plane.length();
+					float y_ratio = abs(y_projection) * project_plane.length();
+					int new_x = x_ratio * buffer_width;
+					int new_y = y_ratio * project_plane.length() * buffer_width;
+
+					vec3f light = vec3f();
+					light[0] = *(m_nBackground + (new_x * m_nBackground_width / buffer_width
+						+ new_y * m_nBackground_width / buffer_width * m_nBackground_width) * 3 + 0) / 255.0;
+					light[1] = *(m_nBackground + (new_x * m_nBackground_width / buffer_width
+						+ new_y * m_nBackground_width / buffer_width * m_nBackground_width) * 3 + 1) / 255.0;
+					light[2] = *(m_nBackground + (new_x * m_nBackground_width / buffer_width
+						+ new_y * m_nBackground_width / buffer_width * m_nBackground_width) * 3 + 2) / 255.0;
+					return light;
+
+			}
+		}
 		return vec3f( 0.0, 0.0, 0.0 );
 	}
 }
@@ -132,6 +166,7 @@ RayTracer::RayTracer()
 RayTracer::~RayTracer()
 {
 	delete [] buffer;
+	delete [] m_nBackground;
 	delete scene;
 }
 
@@ -221,11 +256,12 @@ void RayTracer::tracePixel( int i, int j )
 	double x = double(i)/double(buffer_width);
 	double y = double(j)/double(buffer_height);
 
-	col = trace( scene,x,y );
+	col = trace( scene,x,y,i,j );
 
-	unsigned char *pixel = buffer + ( i + j * buffer_width ) * 3;
+	unsigned char* pixel = buffer + ( i + j * buffer_width ) * 3;
 
-	pixel[0] = (int)( 255.0 * col[0]);
-	pixel[1] = (int)( 255.0 * col[1]);
-	pixel[2] = (int)( 255.0 * col[2]);
+		pixel[0] = (int)(255.0 * col[0]);
+		pixel[1] = (int)(255.0 * col[1]);
+		pixel[2] = (int)(255.0 * col[2]);
+
 }

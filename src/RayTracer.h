@@ -12,8 +12,8 @@ public:
     RayTracer();
     ~RayTracer();
 
-    vec3f trace( Scene *scene, double x, double y );
-	vec3f traceRay( Scene *scene, const ray& r, const vec3f& thresh, int depth );
+	vec3f trace(Scene* scene, double x, double y, int i, int j);
+	vec3f traceRay( Scene *scene, const ray& r, const vec3f& thresh, int depth, int x, int y);
 
 
 	void getBuffer( unsigned char *&buf, int &w, int &h );
@@ -26,11 +26,17 @@ public:
 
 	bool sceneLoaded();
 
+	int			   m_nBackground_width = 0;
+	unsigned char* m_nBackground = NULL;
+	bool		   m_isBackground = false;
+
 private:
 	unsigned char *buffer;
 	int buffer_width, buffer_height;
 	int bufferSize;
 	Scene *scene;
+
+
 
 	bool m_bSceneLoaded;
 };
