@@ -92,6 +92,11 @@ void TraceUI::cb_depthSlides(Fl_Widget* o, void* v)
 	((TraceUI*)(o->user_data()))->m_nDepth=int( ((Fl_Slider *)o)->value() ) ;
 }
 
+void TraceUI::cb_thresholdSlides(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->m_nThreshold = double(((Fl_Slider*)o)->value());
+}
+
 void TraceUI::cb_render(Fl_Widget* o, void* v)
 {
 	char buffer[256];
@@ -221,6 +226,11 @@ int TraceUI::getDepth()
 	return m_nDepth;
 }
 
+double TraceUI::getThreshold()
+{
+	return m_nThreshold;
+}
+
 // menu definition
 Fl_Menu_Item TraceUI::menuitems[] = {
 	{ "&File",		0, 0, 0, FL_SUBMENU },
@@ -240,7 +250,11 @@ TraceUI::TraceUI() {
 	// init.
 	m_nDepth = 0;
 	m_nSize = 150;
+
 	m_mainWindow = new Fl_Window(100, 40, 320, 400, "Ray <Not Loaded>");
+
+	m_nThreshold = 0.0;
+
 		m_mainWindow->user_data((void*)(this));	// record self to be used by static callback functions
 		// install menu bar
 		m_menubar = new Fl_Menu_Bar(0, 0, 320, 25);
@@ -272,6 +286,20 @@ TraceUI::TraceUI() {
 		m_sizeSlider->align(FL_ALIGN_RIGHT);
 		m_sizeSlider->callback(cb_sizeSlides);
 
+		// install slider threshold
+		m_thresholdSlider = new Fl_Value_Slider(10, 80, 180, 20, "threshold");
+		m_thresholdSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_thresholdSlider->type(FL_HOR_NICE_SLIDER);
+		m_thresholdSlider->labelfont(FL_COURIER);
+		m_thresholdSlider->labelsize(12);
+		m_thresholdSlider->minimum(0.00);
+		m_thresholdSlider->maximum(1.00);
+		m_thresholdSlider->step(0.01);
+		m_thresholdSlider->value(m_nThreshold);
+		m_thresholdSlider->align(FL_ALIGN_RIGHT);
+		m_thresholdSlider->callback(cb_thresholdSlides);
+
+
 		m_renderButton = new Fl_Button(240, 27, 70, 25, "&Render");
 		m_renderButton->user_data((void*)(this));
 		m_renderButton->callback(cb_render);
@@ -280,22 +308,22 @@ TraceUI::TraceUI() {
 		m_stopButton->user_data((void*)(this));
 		m_stopButton->callback(cb_stop);
 
-		m_visualize_check = new Fl_Check_Button(160, 110, 70, 25, "Visualize supersample");
+		m_visualize_check = new Fl_Check_Button(160, 120, 70, 20, "Visualize supersample");
 		m_visualize_check->value(show_sample_visualize);
 		m_visualize_check->user_data((void*)(this));
 		m_visualize_check->callback(cb_sample_visualize);
 
-		m_jittering_check = new Fl_Check_Button(10, 110, 70, 25, "jittering");
+		m_jittering_check = new Fl_Check_Button(10, 120, 70, 20, "jittering");
 		m_jittering_check->value(jittering);
 		m_jittering_check->user_data((void*)(this));
 		m_jittering_check->callback(cb_jittering_check);
 
-		m_supersample_check = new Fl_Check_Button(10, 85, 70, 25, "super sampling");
+		m_supersample_check = new Fl_Check_Button(10, 100, 70, 20, "super sampling");
 		m_supersample_check->value(super_sampling);
 		m_supersample_check->user_data((void*)(this));
 		m_supersample_check->callback(cb_super_sample_check);
 
-		m_adaptive_check = new Fl_Check_Button(160, 85, 70, 25, "adaptive");
+		m_adaptive_check = new Fl_Check_Button(160, 100, 70, 20, "adaptive");
 		m_adaptive_check->value(adaptive_super_sampling);
 		m_adaptive_check->user_data((void*)(this));
 		m_adaptive_check->callback(cb_adaptive_supersample_check);
@@ -317,9 +345,9 @@ TraceUI::TraceUI() {
 		m_adaptive_thresh_slider->type(FL_HOR_NICE_SLIDER);
 		m_adaptive_thresh_slider->labelfont(FL_COURIER);
 		m_adaptive_thresh_slider->labelsize(12);
-		m_adaptive_thresh_slider->minimum(0.005);
-		m_adaptive_thresh_slider->maximum(0.05);
-		m_adaptive_thresh_slider->step(0.005);
+		m_adaptive_thresh_slider->minimum(0.05);
+		m_adaptive_thresh_slider->maximum(0.5);
+		m_adaptive_thresh_slider->step(0.05);
 		m_adaptive_thresh_slider->value(adaptive_thresh);
 		m_adaptive_thresh_slider->align(FL_ALIGN_RIGHT);
 		m_adaptive_thresh_slider->callback(cb_adaptive_thresh_slides);

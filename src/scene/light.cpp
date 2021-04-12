@@ -80,8 +80,54 @@ vec3f PointLight::shadowAttenuation(const vec3f& P) const
 		}
 		else
 			atten = { 1, 1, 1 };
+
+		if(i.t< RAY_EPSILON)
+			atten = { 1, 1, 1 };
 	}
 	return atten;
+}
+
+vec3f SpotLight::shadowAttenuation(const vec3f& P) const
+{
+	double distance_from_center = (P - position).length() * sqrt(1 - pow((P - position).normalize() * direction.normalize(), 2.0));
+	vec3f atten;
+	if (distance_from_center <= radius)
+	{
+		vec3f d = -direction.normalize();
+		isect i;
+		ray r(P, d);
+
+		if (scene->intersect(r, i))
+			atten = i.obj->getMaterial().kt;
+		else atten = { 1, 1, 1 };
+	}
+	else
+		return vec3f(1, 1, 1);
+	return atten;
+}
+
+double SpotLight::distanceAttenuation(const vec3f& P) const
+{
+	return 1.0;
+}
+
+vec3f SpotLight::getColor(const vec3f& P) const
+{
+	double distance_from_center = (P - position).length() * sqrt(1 - pow((P - position).normalize() * direction.normalize(), 2.0));
+	if (distance_from_center <= radius )
+		return color;
+	else
+		return vec3f(0.0, 0.0, 0.0);
+}
+
+vec3f SpotLight::getDirection(const vec3f& P) const
+{
+	return -direction;
+}
+
+double SpotLight::getRadius() const
+{
+	return radius;
 }
 
 vec3f AmbientLight::getColor(const vec3f& P) const

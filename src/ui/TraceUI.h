@@ -28,6 +28,7 @@ public:
 
 	Fl_Slider*			m_sizeSlider;
 	Fl_Slider*			m_depthSlider;
+	Fl_Slider*			m_thresholdSlider;
 
 	Fl_Button*			m_renderButton;
 	Fl_Button*			m_stopButton;
@@ -49,6 +50,7 @@ public:
 
 	int			getSize();
 	int			getDepth();
+	double		getThreshold();
 
 	bool show_sample_visualize{ false };
 	bool jittering{ false };
@@ -62,6 +64,7 @@ private:
 
 	int			m_nSize;
 	int			m_nDepth;
+	double		m_nThreshold;
 
 // static class members
 	static Fl_Menu_Item menuitems[];
@@ -77,6 +80,7 @@ private:
 
 	static void cb_sizeSlides(Fl_Widget* o, void* v);
 	static void cb_depthSlides(Fl_Widget* o, void* v);
+	static void cb_thresholdSlides(Fl_Widget* o, void* v);
 
 	static void cb_render(Fl_Widget* o, void* v);
 	static void cb_stop(Fl_Widget* o, void* v);
