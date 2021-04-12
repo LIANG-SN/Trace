@@ -62,7 +62,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 			return finalI;
 
 		// reflection
-		if (refrac_stack.empty())
+		if (refrac_stack.empty() && (m.kr[0] > 0 || m.kr[1] > 0 || m.kr[2] > 0))
 		{
 		    vec3f reflectDirection = 
 		    	 - (2 * (rayDirection.dot(N)) * N - rayDirection).normalize();
@@ -75,8 +75,10 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 				return finalI;
 		}
 		// refraction
+		//cou//t << m.kt[0] << endl;
 		if (m.kt[0] != 0 || m.kt[1] != 0 || m.kt[2] != 0)
 		{
+			//c//out << m.kt[0] << " " << m.kt[1] << endl;
 		    double n_i, n_t;
 		    if (rayDirection.dot(N) <= 0) // enter an object
 		    {
