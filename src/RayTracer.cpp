@@ -201,8 +201,11 @@ void RayTracer::traceSetup( int w, int h )
 		bufferSize = buffer_width * buffer_height * 3;
 		delete [] buffer;
 		buffer = new unsigned char[ bufferSize ];
+		delete[] visualize_sample_buffer;
+		visualize_sample_buffer = new unsigned char[bufferSize / 3];
 	}
 	memset( buffer, 0, w*h*3 );
+	memset(visualize_sample_buffer, 0, w * h);
 }
 
 void RayTracer::traceLines( int start, int stop )
