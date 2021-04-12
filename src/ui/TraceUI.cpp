@@ -11,6 +11,7 @@
 
 #include "TraceUI.h"
 #include "../RayTracer.h"
+#include "../fileio/bitmap.h"
 
 static bool done;
 
@@ -41,11 +42,35 @@ void TraceUI::cb_load_scene(Fl_Menu_* o, void* v)
 	}
 }
 
-void TraceUI::cb_save_image(Fl_Menu_* o, void* v) 
+void TraceUI::cb_load_background_image(Fl_Menu_* o, void* v)
 {
 	TraceUI* pUI=whoami(o);
 	
-	char* savefile = fl_file_chooser("Save Image?", "*.bmp", "save.bmp" );
+	char* newfile = fl_file_chooser("load Background Image?", "*.bmp", NULL );
+	if (newfile != NULL) {
+		unsigned char* data;
+		int				width,
+						height;
+
+		if ((data = readBMP(newfile, width, height)) == NULL)
+		{
+			fl_alert("Can't load bitmap file");
+			return ;
+		}
+		if (pUI->raytracer->m_nBackground != NULL)
+			delete[] pUI->raytracer->m_nBackground;
+		pUI->raytracer->m_nBackground = data;
+		pUI->m_nBackground_width = width;
+		pUI->raytracer->m_nBackground_width = width;
+	}
+
+}
+
+void TraceUI::cb_save_image(Fl_Menu_* o, void* v)
+{
+	TraceUI* pUI = whoami(o);
+
+	char* savefile = fl_file_chooser("Save Image?", "*.bmp", "save.bmp");
 	if (savefile != NULL) {
 		pUI->m_traceGlWindow->saveImage(savefile);
 	}
@@ -97,6 +122,12 @@ void TraceUI::cb_thresholdSlides(Fl_Widget* o, void* v)
 	((TraceUI*)(o->user_data()))->m_nThreshold = double(((Fl_Slider*)o)->value());
 }
 
+void TraceUI::cb_is_background(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->m_isBackground = bool(((Fl_Check_Button*)o)->value());
+	((TraceUI*)(o->user_data()))->raytracer->m_isBackground = bool(((Fl_Check_Button*)o)->value());
+}
+
 void TraceUI::cb_render(Fl_Widget* o, void* v)
 {
 	char buffer[256];
@@ -104,6 +135,7 @@ void TraceUI::cb_render(Fl_Widget* o, void* v)
 	TraceUI* pUI=((TraceUI*)(o->user_data()));
 	
 	if (pUI->raytracer->sceneLoaded()) {
+		cout << pUI->m_isBackground << endl;
 		int width=pUI->getSize();
 		int	height = (int)(width / pUI->raytracer->aspectRatio() + 0.5);
 		pUI->m_traceGlWindow->resizeWindow( width, height );
@@ -231,11 +263,13 @@ double TraceUI::getThreshold()
 	return m_nThreshold;
 }
 
+
 // menu definition
 Fl_Menu_Item TraceUI::menuitems[] = {
 	{ "&File",		0, 0, 0, FL_SUBMENU },
 		{ "&Load Scene...",	FL_ALT + 'l', (Fl_Callback *)TraceUI::cb_load_scene },
 		{ "&Save Image...",	FL_ALT + 's', (Fl_Callback *)TraceUI::cb_save_image },
+		{"&Load Background Image...",0,(Fl_Callback*)TraceUI::cb_load_background_image},
 		{ "&Exit",			FL_ALT + 'e', (Fl_Callback *)TraceUI::cb_exit },
 		{ 0 },
 
@@ -298,6 +332,12 @@ TraceUI::TraceUI() {
 		m_thresholdSlider->value(m_nThreshold);
 		m_thresholdSlider->align(FL_ALIGN_RIGHT);
 		m_thresholdSlider->callback(cb_thresholdSlides);
+
+
+		m_checkBackgroundButton=new Fl_Check_Button(10, 190 , 150, 25, "Background");
+		m_checkBackgroundButton->value(m_isBackground);
+		m_checkBackgroundButton->user_data((void*)(this));
+		m_checkBackgroundButton->callback(cb_is_background);
 
 
 		m_renderButton = new Fl_Button(240, 27, 70, 25, "&Render");

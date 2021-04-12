@@ -32,6 +32,7 @@ public:
 
 	Fl_Button*			m_renderButton;
 	Fl_Button*			m_stopButton;
+	Fl_Check_Button*	m_checkBackgroundButton;
 
 	TraceGLWindow*		m_traceGlWindow;
 
@@ -52,6 +53,12 @@ public:
 	int			getDepth();
 	double		getThreshold();
 
+
+	//void		setBackground(unsigned char* i) { m_nBackground =i};
+	//void		setBrackgroundWidth(int w) { m_nBackground_width = w; };
+	int			m_nBackground_width = 0;
+	bool		m_isBackground = false;
+
 	bool show_sample_visualize{ false };
 	bool jittering{ false };
 	bool super_sampling{ false };
@@ -66,13 +73,20 @@ private:
 	int			m_nDepth;
 	double		m_nThreshold;
 
+
+
+
 // static class members
+
+
+
 	static Fl_Menu_Item menuitems[];
 
 	static TraceUI* whoami(Fl_Menu_* o);
 
 	static void cb_load_scene(Fl_Menu_* o, void* v);
 	static void cb_save_image(Fl_Menu_* o, void* v);
+	static void cb_load_background_image(Fl_Menu_* o, void* v);
 	static void cb_exit(Fl_Menu_* o, void* v);
 	static void cb_about(Fl_Menu_* o, void* v);
 
@@ -81,6 +95,8 @@ private:
 	static void cb_sizeSlides(Fl_Widget* o, void* v);
 	static void cb_depthSlides(Fl_Widget* o, void* v);
 	static void cb_thresholdSlides(Fl_Widget* o, void* v);
+
+	static void cb_is_background(Fl_Widget* o, void* v);
 
 	static void cb_render(Fl_Widget* o, void* v);
 	static void cb_stop(Fl_Widget* o, void* v);
