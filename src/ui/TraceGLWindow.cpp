@@ -6,7 +6,9 @@
 #include "../RayTracer.h"
 
 #include "../fileio/bitmap.h"
+#include "TraceUI.h"
 
+extern TraceUI* traceUI;
 TraceGLWindow::TraceGLWindow(int x, int y, int w, int h, const char *l)
 			: Fl_Gl_Window(x,y,w,h,l)
 {
@@ -46,7 +48,14 @@ void TraceGLWindow::draw()
 		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 		glPixelStorei( GL_UNPACK_ROW_LENGTH, m_nDrawWidth );
 		glDrawBuffer( GL_BACK );
-		glDrawPixels( m_nDrawWidth, m_nDrawHeight, GL_RGB, GL_UNSIGNED_BYTE, buf );
+		if (traceUI->show_sample_visualize)
+		{
+			unsigned char* buff;
+			raytracer->getSampleBuffer(buff, m_nDrawWidth, m_nDrawHeight);
+			glDrawPixels(m_nDrawWidth, m_nDrawHeight, GL_LUMINANCE, GL_UNSIGNED_BYTE, buff);
+		}
+		else
+			glDrawPixels( m_nDrawWidth, m_nDrawHeight, GL_RGB, GL_UNSIGNED_BYTE, buf );
 	}
 		
 	glFlush();

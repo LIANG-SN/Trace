@@ -114,7 +114,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// No intersection.  This ray travels to infinity, so we color
 		// it according to the background color, which in this (simple) case
 		// is just black.
-		if (m_isBackground)
+		if (m_isBackground && x>=0 && y>=0)
 		{
 			if (depth == 0)
 			{
@@ -167,12 +167,19 @@ RayTracer::~RayTracer()
 {
 	delete [] buffer;
 	delete [] m_nBackground;
+	delete [] visualize_sample_buffer;
 	delete scene;
 }
 
 void RayTracer::getBuffer( unsigned char *&buf, int &w, int &h )
 {
 	buf = buffer;
+	w = buffer_width;
+	h = buffer_height;
+}
+void RayTracer::getSampleBuffer(unsigned char*& buf, int& w, int& h)
+{
+	buf = visualize_sample_buffer;
 	w = buffer_width;
 	h = buffer_height;
 }
@@ -207,6 +214,7 @@ bool RayTracer::loadScene( char* fn )
 
 	bufferSize = buffer_width * buffer_height * 3;
 	buffer = new unsigned char[ bufferSize ];
+	visualize_sample_buffer = new unsigned char[bufferSize / 3];
 	
 	// separate objects into bounded and unbounded
 	scene->initScene();
@@ -245,21 +253,93 @@ void RayTracer::traceLines( int start, int stop )
 		for( int i = 0; i < buffer_width; ++i )
 			tracePixel(i,j);
 }
+vec3f RayTracer::adaptiveSample(double center_x, double center_y,
+	double range_x, double range_y, int& num_samples)
+{
+	// check depth
+	int n = traceUI->sample_per_pixel;
 
+	double thresh = traceUI->adaptive_thresh;
+	vec3f LT = trace(scene, center_x - range_x / 2, center_y + range_y / 2, -1, -1);
+	vec3f LB = trace(scene, center_x - range_x / 2, center_y - range_y / 2, -1, -1);
+	vec3f RT = trace(scene, center_x + range_x / 2, center_y + range_y / 2, -1, -1);
+	vec3f RB = trace(scene, center_x + range_x / 2, center_y - range_y / 2, -1, -1);
+	vec3f average = (LT + LB + RT + RB) / 4;
+	num_samples += 4;
+	double diff = max((LT - average).length(), (LB - average).length(),
+		(RT - average).length(), (RB - average).length());
+	if (diff <= thresh || num_samples + 16 > n * n)
+	{
+		return average;
+	}
+	else
+	{
+		//  c1		 c2
+		//		 c
+		//  c3		 c4
+		double center_x1 = center_x - range_x / 4;
+		double center_x2 = center_x + range_x / 4;
+		double center_x3 = center_x - range_x / 4;
+		double center_x4 = center_x + range_x / 4;
+		double center_y1 = center_y + range_y / 4;
+		double center_y2 = center_y + range_y / 4;
+		double center_y3 = center_y - range_y / 4;
+		double center_y4 = center_y - range_y / 4;
+
+		return (adaptiveSample(center_x1, center_y1, range_x / 2, range_y / 2, num_samples)
+			+ adaptiveSample(center_x2, center_y2, range_x / 2, range_y / 2, num_samples)
+			+ adaptiveSample(center_x3, center_y3, range_x / 2, range_y / 2, num_samples)
+			+ adaptiveSample(center_x4, center_y4, range_x / 2, range_y / 2, num_samples) ) / 4;
+	}
+}
+static int line = 0;
 void RayTracer::tracePixel( int i, int j )
 {
 	vec3f col;
 
 	if( !scene )
 		return;
-
+	// super-sampling
+	double pix_w = 1.0 / double(buffer_width);
+	double pix_h = 1.0 / double(buffer_height);
+	if (traceUI->adaptive_super_sampling) // if adaptive super sample
+	{
+		int num_samples = 0;
+		col = adaptiveSample(double(i) / double(buffer_width), double(j) / double(buffer_height),
+			pix_w, pix_h, num_samples);
+		// store num_samples to visualize
+		num_samples = min(num_samples, 255);
+		*(visualize_sample_buffer + j * buffer_width + i) = num_samples;
+	}
+	else if (traceUI->super_sampling) // if not adaptive but average down
+	{
+		int n = traceUI->sample_per_pixel; 
+		vec3f average(0, 0, 0);
+		for (int s = 0; s <= n; s++)
+		{
+			for (int t = 0; t <= n; t++)
+			{
+				bool is_jitter = traceUI->jittering;
+				double jitter = is_jitter ? (double)(rand() % 9 - 4) / 9.0 : 0;
+				double x = double(i) / double(buffer_width) - pix_w / 2 + (float(s) / n) * pix_w
+					+ jitter / n * pix_w;
+				double y = double(j) / double(buffer_height) - pix_h / 2 + (float(t) / n) * pix_h
+					+ jitter / n * pix_h;
+				average += trace(scene, x, y, -1, -1);
+			}
+		}
 	double x = double(i)/double(buffer_width);
 	double y = double(j)/double(buffer_height);
 
-	col = trace( scene,x,y,i,j );
+	col = trace( scene,x,y, -1, -1);
 
-	unsigned char* pixel = buffer + ( i + j * buffer_width ) * 3;
 
+		col = average / (float)(n * n);
+	}
+	else
+		col = trace(scene, double(i) / double(buffer_width), double(j) / double(buffer_height),i,j);
+
+unsigned char* pixel = buffer + (i + j * buffer_width) * 3;
 		pixel[0] = (int)(255.0 * col[0]);
 		pixel[1] = (int)(255.0 * col[1]);
 		pixel[2] = (int)(255.0 * col[2]);

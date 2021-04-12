@@ -158,7 +158,8 @@ int main(int argc, char **argv) {
 			usage();
 			exit(1);
 		}
-		
+
+		srand(time(0));
 		theRayTracer=new RayTracer();
 		theRayTracer->loadScene(rayName);
 	

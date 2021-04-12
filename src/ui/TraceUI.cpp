@@ -210,6 +210,32 @@ void TraceUI::cb_stop(Fl_Widget* o, void* v)
 {
 	done=true;
 }
+void TraceUI::cb_sample_visualize(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->show_sample_visualize = bool(((Fl_Check_Button*)o)->value());
+	TraceUI* pUI = ((TraceUI*)(o->user_data()));
+	pUI->m_traceGlWindow->refresh();
+}
+void TraceUI::cb_jittering_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->jittering = bool(((Fl_Check_Button*)o)->value());
+}
+void TraceUI::cb_super_sample_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->super_sampling = bool(((Fl_Check_Button*)o)->value());
+}
+void TraceUI::cb_adaptive_supersample_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->adaptive_super_sampling = bool(((Fl_Check_Button*)o)->value());
+}
+void TraceUI::cb_sample_slides(Fl_Widget* o, void* v) 
+{
+	((TraceUI*)(o->user_data()))->sample_per_pixel = int(((Fl_Slider*)o)->value());
+}
+void TraceUI::cb_adaptive_thresh_slides(Fl_Widget* o, void* v) 
+{
+	((TraceUI*)(o->user_data()))->adaptive_thresh = int(((Fl_Slider*)o)->value());
+}
 
 void TraceUI::show()
 {
@@ -258,8 +284,11 @@ TraceUI::TraceUI() {
 	// init.
 	m_nDepth = 0;
 	m_nSize = 150;
+
+	m_mainWindow = new Fl_Window(100, 40, 320, 400, "Ray <Not Loaded>");
+
 	m_nThreshold = 0.0;
-	m_mainWindow = new Fl_Window(100, 40, 320, 560, "Ray <Not Loaded>");
+
 		m_mainWindow->user_data((void*)(this));	// record self to be used by static callback functions
 		// install menu bar
 		m_menubar = new Fl_Menu_Bar(0, 0, 320, 25);
@@ -305,7 +334,7 @@ TraceUI::TraceUI() {
 		m_thresholdSlider->callback(cb_thresholdSlides);
 
 
-		m_checkBackgroundButton=new Fl_Check_Button(10, 100 , 150, 25, "Background");
+		m_checkBackgroundButton=new Fl_Check_Button(10, 190 , 150, 25, "Background");
 		m_checkBackgroundButton->value(m_isBackground);
 		m_checkBackgroundButton->user_data((void*)(this));
 		m_checkBackgroundButton->callback(cb_is_background);
@@ -318,6 +347,50 @@ TraceUI::TraceUI() {
 		m_stopButton = new Fl_Button(240, 55, 70, 25, "&Stop");
 		m_stopButton->user_data((void*)(this));
 		m_stopButton->callback(cb_stop);
+
+		m_visualize_check = new Fl_Check_Button(160, 120, 70, 20, "Visualize supersample");
+		m_visualize_check->value(show_sample_visualize);
+		m_visualize_check->user_data((void*)(this));
+		m_visualize_check->callback(cb_sample_visualize);
+
+		m_jittering_check = new Fl_Check_Button(10, 120, 70, 20, "jittering");
+		m_jittering_check->value(jittering);
+		m_jittering_check->user_data((void*)(this));
+		m_jittering_check->callback(cb_jittering_check);
+
+		m_supersample_check = new Fl_Check_Button(10, 100, 70, 20, "super sampling");
+		m_supersample_check->value(super_sampling);
+		m_supersample_check->user_data((void*)(this));
+		m_supersample_check->callback(cb_super_sample_check);
+
+		m_adaptive_check = new Fl_Check_Button(160, 100, 70, 20, "adaptive");
+		m_adaptive_check->value(adaptive_super_sampling);
+		m_adaptive_check->user_data((void*)(this));
+		m_adaptive_check->callback(cb_adaptive_supersample_check);
+
+		m_sample_slider = new Fl_Value_Slider(10, 140, 180, 20, "samples per pixel");
+		m_sample_slider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_sample_slider->type(FL_HOR_NICE_SLIDER);
+		m_sample_slider->labelfont(FL_COURIER);
+		m_sample_slider->labelsize(12);
+		m_sample_slider->minimum(3);
+		m_sample_slider->maximum(10);
+		m_sample_slider->step(1);
+		m_sample_slider->value(sample_per_pixel);
+		m_sample_slider->align(FL_ALIGN_RIGHT);
+		m_sample_slider->callback(cb_sample_slides);
+
+		m_adaptive_thresh_slider = new Fl_Value_Slider(10, 160, 180, 20, "adaptive threshold");
+		m_adaptive_thresh_slider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_adaptive_thresh_slider->type(FL_HOR_NICE_SLIDER);
+		m_adaptive_thresh_slider->labelfont(FL_COURIER);
+		m_adaptive_thresh_slider->labelsize(12);
+		m_adaptive_thresh_slider->minimum(0.05);
+		m_adaptive_thresh_slider->maximum(0.5);
+		m_adaptive_thresh_slider->step(0.05);
+		m_adaptive_thresh_slider->value(adaptive_thresh);
+		m_adaptive_thresh_slider->align(FL_ALIGN_RIGHT);
+		m_adaptive_thresh_slider->callback(cb_adaptive_thresh_slides);
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);
