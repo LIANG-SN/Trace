@@ -198,3 +198,36 @@ void Scene::initScene()
 			nonboundedobjects.push_back(*j);
 	}
 }
+
+
+void Scene::getGradientOfPoint(const int x, const int y, int& Gx, int& Gy)
+{
+	if (x < 1 || x > m_nBumpMap_width-2 || y < 1 || y > m_nBumpMap_height-2)
+	{
+		Gx = Gy = 0;
+		return;
+	}
+
+	int sobel_x[3][3] =
+	{
+		{ 1, 0, -1 },
+		{ 2, 0, -2 },
+		{ 1, 0, -1 }
+	};
+	Gx = 0;
+	Gy = 0;
+	for (int a = -1; a <= 1; a++)
+	{
+		for (int b = -1; b <= 1; b++)
+		{
+			int i = x + a;
+			int j = y + b;
+			unsigned char* pixel = m_nBumpMap + (i + j * m_nBumpMap_width) * 3;
+			// formula from tutorial doc page 19
+			int pixelValue = 0.299 * pixel[0] + 0.587 * pixel[1] + 0.114 * pixel[2];
+			Gx += sobel_x[a + 1][b + 1] * pixelValue;
+			Gy += sobel_x[b + 1][a + 1] * pixelValue;
+		}
+	}
+
+}

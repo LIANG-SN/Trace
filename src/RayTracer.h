@@ -25,27 +25,36 @@ public:
 	vec3f RayTracer::adaptiveSample(double center_x, double center_y,
 		double range_x, double range_y, int& num_samples);
 
+
+
 	bool loadScene( char* fn );
 
 	bool sceneLoaded();
 
 	int			   m_nBackground_width = 0;
 	unsigned char* m_nBackground = NULL;
+
 	int			   m_nTextureMap_width = 0;
 	int			   m_nTextureMap_height = 0;
 	unsigned char* m_nTextureMap = NULL;
+
+	int			   m_nBumpMap_width = 0;
+	int			   m_nBumpMap_height = 0;
+	unsigned char* m_nBumpMap = NULL;
+
 	bool		   m_isBackground = false;
 	bool		   m_isTextureMap = false;
+	bool		   m_isBumpMap = false;
 	// bool sample_visualize();
 
+	void setSceneBumpMap();
+	void setSceneTextureMap();
 private:
 	unsigned char *buffer;
 	unsigned char* visualize_sample_buffer;
 	int buffer_width, buffer_height;
 	int bufferSize;
 	Scene *scene;
-
-
 
 	bool m_bSceneLoaded;
 };

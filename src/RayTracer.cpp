@@ -9,12 +9,16 @@
 #include "fileio/read.h"
 #include "fileio/parse.h"
 #include "ui/TraceUI.h"
+#include "SceneObjects/Sphere.h"
+#include "SceneObjects/Square.h"
 #include <stack>
 
-#define PI acos(-1)
+
 
 extern TraceUI* traceUI;
 stack<double> refrac_stack;
+
+
 // Trace a top-level ray through normalized window coordinates (x,y)
 // through the projection plane, and out into the scene.  All we do is
 // enter the main ray-tracing method, getting things started by plugging
@@ -58,27 +62,6 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		vec3f N = i.N.normalize();
 		// shade
 		vec3f shade = m.shade(scene, r, i);
-		if (m_isTextureMap)
-		{
-			vec3f local=(*(scene->beginBoundedobjects()))->getTransform()->globalToLocalCoords(r.at(i.t));
-			double rx, ry;
-			vec3f Sp = vec3f(0, -1, 0);
-			vec3f Se = vec3f(0, 0, 1);
-
-			ry = acos(Sp * local.normalize()) / PI;
-
-			rx = acos(Se * local.normalize() / sin(acos(Sp * local.normalize())) / (2 * PI));
-			//cout << rx << " " << ry << endl;
-			
-			vec3f color;
-			int u = m_nTextureMap_width * rx;
-			int v = m_nTextureMap_height * ry;
-			color[0] = *(m_nTextureMap + (u + v * m_nTextureMap_width) * 3 + 0);
-			color[1] = *(m_nTextureMap + (u + v * m_nTextureMap_width) * 3 + 1);
-			color[2] = *(m_nTextureMap + (u + v * m_nTextureMap_width) * 3 + 2);
-			return color.multiply(shade) / 255.0;
-		}
-
 
 
 		if (depth >= traceUI->getDepth())
@@ -143,7 +126,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// No intersection.  This ray travels to infinity, so we color
 		// it according to the background color, which in this (simple) case
 		// is just black.
-		if (m_isBackground && x>=0 && y>=0)
+		if (m_isBackground && x>=0 && y>=0 && m_nBackground!=NULL)
 		{
 			if (depth == 0)
 			{
@@ -221,6 +204,21 @@ double RayTracer::aspectRatio()
 bool RayTracer::sceneLoaded()
 {
 	return m_bSceneLoaded;
+}
+
+void RayTracer::setSceneBumpMap()
+{
+	scene->m_nBumpMap_width = m_nBumpMap_width;
+	scene->m_nBumpMap_height = m_nBumpMap_height;
+	scene->m_nBumpMap = m_nBumpMap;
+	scene->m_isBumpMap = m_isBumpMap;
+}
+void RayTracer::setSceneTextureMap()
+{
+	scene->m_nTextureMap_width = m_nTextureMap_width;
+	scene->m_nTextureMap_height = m_nTextureMap_height;
+	scene->m_nTextureMap = m_nTextureMap;
+	scene->m_isTextureMap = m_isTextureMap;
 }
 
 bool RayTracer::loadScene( char* fn )

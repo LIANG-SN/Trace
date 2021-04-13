@@ -249,6 +249,17 @@ public:
 
     TransformRoot transformRoot;
 
+	int			   m_nTextureMap_width = 0;
+	int			   m_nTextureMap_height = 0;
+	unsigned char* m_nTextureMap = NULL;
+
+	int			   m_nBumpMap_width = 0;
+	int			   m_nBumpMap_height = 0;
+	unsigned char* m_nBumpMap = NULL;
+
+	bool		   m_isTextureMap = false;
+	bool		   m_isBumpMap = false;
+
 public:
 	Scene() 
 		: transformRoot(), objects(), lights() {}
@@ -271,7 +282,7 @@ public:
 		return boundedobjects.begin();
 	}
 	Camera *getCamera() { return &camera; }
-
+	void getGradientOfPoint(const int x, const int y, int& Gx, int& Gy);
 	
 
 private:
