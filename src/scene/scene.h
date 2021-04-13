@@ -19,7 +19,7 @@ using namespace std;
 
 class Light;
 class Scene;
-
+class BVH;
 class SceneElement
 {
 public:
@@ -281,6 +281,9 @@ public:
 	list<Geometry*>::const_iterator beginBoundedobjects() const {
 		return boundedobjects.begin();
 	}
+	list<Geometry*>::const_iterator endBoundedobjects() const {
+		return boundedobjects.end();
+	}
 	Camera *getCamera() { return &camera; }
 	void getGradientOfPoint(const int x, const int y, int& Gx, int& Gy);
 	
@@ -296,6 +299,33 @@ private:
 	// must fall within this bounding box.  Objects that don't have hasBoundingBoxCapability()
 	// are exempt from this requirement.
 	BoundingBox sceneBounds;
+	BVH* bvh;
+};
+
+class BVHNode
+{
+public:
+	BVHNode* left;
+	BVHNode* right;
+	BoundingBox* bound;
+	Geometry* obj;
+	BVHNode(list<Geometry*>::const_iterator start,
+		list<Geometry*>::const_iterator end, int size);
+	bool intersect(const ray& r, isect& i) const;
+	~BVHNode();
+};
+
+class BVH
+{
+public:
+	// construct root with scene bounding box, sort the objects
+	BVH(list<Geometry*>::const_iterator start,
+		list<Geometry*>::const_iterator end);
+	~BVH();
+	bool intersect(const ray& r, isect& i) const;
+private:
+
+	BVHNode* root;
 };
 
 #endif // __SCENE_H__
