@@ -35,7 +35,7 @@ public:
 	Fl_Check_Button*	m_checkBackgroundButton;
 	Fl_Check_Button*	m_checkTextureMapButton;
 	Fl_Check_Button*	m_checkBumpMapButton;
-
+	Fl_Check_Button*	m_checkSolidTextureButton;
 
 	TraceGLWindow*		m_traceGlWindow;
 
@@ -60,10 +60,10 @@ public:
 
 	//void		setBackground(unsigned char* i) { m_nBackground =i};
 	//void		setBrackgroundWidth(int w) { m_nBackground_width = w; };
-	int			m_nBackground_width = 0;
 	bool		m_isBackground = false;
 	bool		m_isTextureMap = false;
 	bool		m_isBumpMap = false;
+	bool		m_isSolidTexture = false;
 
 	bool show_sample_visualize{ false };
 	bool jittering{ false };
@@ -96,6 +96,7 @@ private:
 	static void cb_load_background_image(Fl_Menu_* o, void* v);
 	static void cb_load_texture_map_image(Fl_Menu_* o, void* v);
 	static void cb_load_bump_map_image(Fl_Menu_* o, void* v);
+	static void cb_load_solid_texture_image(Fl_Menu_* o, void* v);
 	static void cb_exit(Fl_Menu_* o, void* v);
 	static void cb_about(Fl_Menu_* o, void* v);
 
@@ -108,6 +109,7 @@ private:
 	static void cb_is_background(Fl_Widget* o, void* v);
 	static void cb_is_texture_map(Fl_Widget* o, void* v);
 	static void cb_is_bump_map(Fl_Widget* o, void* v);
+	static void cb_is_solid_texture(Fl_Widget* o, void* v);
 
 	static void cb_render(Fl_Widget* o, void* v);
 	static void cb_stop(Fl_Widget* o, void* v);

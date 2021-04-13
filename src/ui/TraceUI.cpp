@@ -60,7 +60,6 @@ void TraceUI::cb_load_background_image(Fl_Menu_* o, void* v)
 		if (pUI->raytracer->m_nBackground != NULL)
 			delete[] pUI->raytracer->m_nBackground;
 		pUI->raytracer->m_nBackground = data;
-		pUI->m_nBackground_width = width;
 		pUI->raytracer->m_nBackground_width = width;
 	}
 }
@@ -105,13 +104,37 @@ void TraceUI::cb_load_bump_map_image(Fl_Menu_* o, void* v)
 			fl_alert("Can't load bitmap file");
 			return;
 		}
-		if (pUI->raytracer->m_nTextureMap != NULL)
-			delete[] pUI->raytracer->m_nTextureMap;
+		if (pUI->raytracer->m_nBumpMap != NULL)
+			delete[] pUI->raytracer->m_nBumpMap;
 		cout << width << endl;
 		pUI->raytracer->m_nBumpMap = data;
 		pUI->raytracer->m_nBumpMap_height = height;
 		pUI->raytracer->m_nBumpMap_width = width;
 		pUI->raytracer->setSceneBumpMap();
+	}
+}
+
+void TraceUI::cb_load_solid_texture_image(Fl_Menu_* o, void* v)
+{
+	TraceUI* pUI = whoami(o);
+
+	char* newfile = fl_file_chooser("load Texture Map Image?", "*.bmp", NULL);
+	if (newfile != NULL) {
+		unsigned char* data;
+		int				width,
+			height;
+
+		if ((data = readBMP(newfile, width, height)) == NULL)
+		{
+			fl_alert("Can't load bitmap file");
+			return;
+		}
+		if (pUI->raytracer->m_nSolidTexture != NULL)
+			delete[] pUI->raytracer->m_nSolidTexture;
+		pUI->raytracer->m_nSolidTexture = data;
+		pUI->raytracer->m_nSolidTexture_height = height;
+		pUI->raytracer->m_nSolidTexture_width = width;
+		pUI->raytracer->setSceneSolidTexture();
 	}
 }
 
@@ -189,6 +212,13 @@ void TraceUI::cb_is_bump_map(Fl_Widget* o, void* v)
 	((TraceUI*)(o->user_data()))->m_isBumpMap = bool(((Fl_Check_Button*)o)->value());
 	((TraceUI*)(o->user_data()))->raytracer->m_isBumpMap = bool(((Fl_Check_Button*)o)->value());
 	((TraceUI*)(o->user_data()))->raytracer->setSceneBumpMap();
+}
+
+void TraceUI::cb_is_solid_texture(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->m_isSolidTexture = bool(((Fl_Check_Button*)o)->value());
+	((TraceUI*)(o->user_data()))->raytracer->m_isSolidTexture = bool(((Fl_Check_Button*)o)->value());
+	((TraceUI*)(o->user_data()))->raytracer->setSceneSolidTexture();
 }
 
 void TraceUI::cb_render(Fl_Widget* o, void* v)
@@ -339,6 +369,7 @@ Fl_Menu_Item TraceUI::menuitems[] = {
 		{"&Load Background Image...",0,(Fl_Callback*)TraceUI::cb_load_background_image},
 		{"&Load Texture Map Image...",0,(Fl_Callback*)TraceUI::cb_load_texture_map_image},
 		{"&Load Bump Map Image...",0,(Fl_Callback*)TraceUI::cb_load_bump_map_image},
+		{"&Load Solid Texture Image...",0,(Fl_Callback*)TraceUI::cb_load_solid_texture_image},
 		{ "&Exit",			FL_ALT + 'e', (Fl_Callback *)TraceUI::cb_exit },
 		{ 0 },
 
@@ -417,6 +448,11 @@ TraceUI::TraceUI() {
 		m_checkBumpMapButton->value(m_isBumpMap);
 		m_checkBumpMapButton->user_data((void*)(this));
 		m_checkBumpMapButton->callback(cb_is_bump_map);
+
+		m_checkSolidTextureButton = new Fl_Check_Button(150, 210, 150, 25, "Solid Texture");
+		m_checkSolidTextureButton->value(m_isSolidTexture);
+		m_checkSolidTextureButton->user_data((void*)(this));
+		m_checkSolidTextureButton->callback(cb_is_solid_texture);
 
 		m_renderButton = new Fl_Button(240, 27, 70, 25, "&Render");
 		m_renderButton->user_data((void*)(this));

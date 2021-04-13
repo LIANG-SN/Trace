@@ -213,12 +213,22 @@ void RayTracer::setSceneBumpMap()
 	scene->m_nBumpMap = m_nBumpMap;
 	scene->m_isBumpMap = m_isBumpMap;
 }
+
 void RayTracer::setSceneTextureMap()
 {
 	scene->m_nTextureMap_width = m_nTextureMap_width;
 	scene->m_nTextureMap_height = m_nTextureMap_height;
 	scene->m_nTextureMap = m_nTextureMap;
 	scene->m_isTextureMap = m_isTextureMap;
+}
+
+void RayTracer::setSceneSolidTexture()
+{
+	cout << 1 << endl;
+	scene->m_nSolidTexture_width = m_nSolidTexture_width;
+	scene->m_nSolidTexture_height = m_nSolidTexture_height;
+	scene->m_nSolidTexture = m_nSolidTexture;
+	scene->m_isSolidTexture = m_isSolidTexture;
 }
 
 bool RayTracer::loadScene( char* fn )

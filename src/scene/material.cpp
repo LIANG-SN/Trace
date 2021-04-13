@@ -95,6 +95,7 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 				N += rate*Gx / 255.0 * d_x;
 				N += rate*Gy / 255.0 * d_y;
 			}
+			
 
 			vec3f R = (2 * (L.dot(N)) * N - L).normalize();
 			vec3f V = (scene->getCamera()->getEye() - p).normalize();
@@ -123,6 +124,42 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 				color[1] = *(scene->m_nTextureMap + (u + v * w) * 3 + 1);
 				color[2] = *(scene->m_nTextureMap + (u + v * w) * 3 + 2);
 				kd = color / 255.0;
+			}
+			if (scene->m_isSolidTexture && scene->m_nSolidTexture != NULL)
+			{
+				Geometry* obj_ptr = (*(scene->beginBoundedobjects()));
+				vec3f local = obj_ptr->getTransform()->globalToLocalCoords(r.at(i.t));
+				double rx = (local[0] + obj_ptr->ComputeLocalBoundingBox().max[0]) /
+					(obj_ptr->ComputeLocalBoundingBox().max[0] - obj_ptr->ComputeLocalBoundingBox().min[0]);
+				double ry = (local[1] + obj_ptr->ComputeLocalBoundingBox().max[1]) / 
+					(obj_ptr->ComputeLocalBoundingBox().max[1] - obj_ptr->ComputeLocalBoundingBox().min[1]);
+				double rz = (local[2] + obj_ptr->ComputeLocalBoundingBox().max[2]) / 
+					(obj_ptr->ComputeLocalBoundingBox().max[2] - obj_ptr->ComputeLocalBoundingBox().min[2]);
+
+				//cout << rx << " " << ry << " " << rz << endl;
+				int w = scene->m_nSolidTexture_width;
+				int h = scene->m_nSolidTexture_height;
+
+				int p1_x = min(w * rx, w - 1);
+				int p1_y = min(h * ry, h - 1);
+
+				int p2_x = min(w * rz, w - 1);
+				int p2_y = min(h * ry, h - 1);
+
+				int p3_x = min(w * rx, w - 1);
+				int p3_y = min(h * rz, h - 1);
+
+				int r = *(scene->m_nSolidTexture + (p1_x + p1_y * w) * 3 + 0) +
+					*(scene->m_nSolidTexture + (p2_x + p2_y * w) * 3 + 0) +
+					*(scene->m_nSolidTexture + (p3_x + p3_y * w) * 3 + 0);
+				int g = *(scene->m_nSolidTexture + (p1_x + p1_y * w) * 3 + 1) +
+					*(scene->m_nSolidTexture + (p2_x + p2_y * w) * 3 + 1) +
+					*(scene->m_nSolidTexture + (p3_x + p3_y * w) * 3 + 1);
+				int b = *(scene->m_nSolidTexture + (p1_x + p1_y * w) * 3 + 2) +
+					*(scene->m_nSolidTexture + (p2_x + p2_y * w) * 3 + 2) +
+					*(scene->m_nSolidTexture + (p3_x + p3_y * w) * 3 + 2);
+				
+				kd = vec3f(r / 3 / 255.0, g / 3 / 255.0, b / 3 / 255.0);
 			}
 
 		    intensity[0] += (*iter)->shadowAttenuation(p)[0] * 

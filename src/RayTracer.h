@@ -42,13 +42,20 @@ public:
 	int			   m_nBumpMap_height = 0;
 	unsigned char* m_nBumpMap = NULL;
 
+
+	int			   m_nSolidTexture_width = 0;
+	int			   m_nSolidTexture_height = 0;
+	unsigned char* m_nSolidTexture = NULL;
+
 	bool		   m_isBackground = false;
 	bool		   m_isTextureMap = false;
 	bool		   m_isBumpMap = false;
+	bool		   m_isSolidTexture = false;
 	// bool sample_visualize();
 
 	void setSceneBumpMap();
 	void setSceneTextureMap();
+	void setSceneSolidTexture();
 private:
 	unsigned char *buffer;
 	unsigned char* visualize_sample_buffer;
