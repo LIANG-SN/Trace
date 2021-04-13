@@ -144,7 +144,7 @@ public:
     // do not call directly - this should only be called by intersect()
 	virtual bool intersectLocal( const ray& r, isect& i ) const;
 
-
+	TransformNode* getTransform() { return transform; };
 	virtual bool hasBoundingBoxCapability() const;
 	const BoundingBox& getBoundingBox() const { return bounds; }
 	virtual void ComputeBoundingBox()
@@ -267,7 +267,9 @@ public:
 
 	list<Light*>::const_iterator beginLights() const { return lights.begin(); }
 	list<Light*>::const_iterator endLights() const { return lights.end(); }
-        
+	list<Geometry*>::const_iterator beginBoundedobjects() const {
+		return boundedobjects.begin();
+	}
 	Camera *getCamera() { return &camera; }
 
 	

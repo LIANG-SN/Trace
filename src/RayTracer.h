@@ -31,8 +31,11 @@ public:
 
 	int			   m_nBackground_width = 0;
 	unsigned char* m_nBackground = NULL;
+	int			   m_nTextureMap_width = 0;
+	int			   m_nTextureMap_height = 0;
+	unsigned char* m_nTextureMap = NULL;
 	bool		   m_isBackground = false;
-
+	bool		   m_isTextureMap = false;
 	// bool sample_visualize();
 
 private:

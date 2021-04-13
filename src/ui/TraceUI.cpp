@@ -63,7 +63,30 @@ void TraceUI::cb_load_background_image(Fl_Menu_* o, void* v)
 		pUI->m_nBackground_width = width;
 		pUI->raytracer->m_nBackground_width = width;
 	}
+}
 
+
+void TraceUI::cb_load_texture_map_image(Fl_Menu_* o, void* v)
+{
+	TraceUI* pUI = whoami(o);
+
+	char* newfile = fl_file_chooser("load Texture Map Image?", "*.bmp", NULL);
+	if (newfile != NULL) {
+		unsigned char* data;
+		int				width,
+						height;
+
+		if ((data = readBMP(newfile, width, height)) == NULL)
+		{
+			fl_alert("Can't load bitmap file");
+			return;
+		}
+		if (pUI->raytracer->m_nTextureMap != NULL)
+			delete[] pUI->raytracer->m_nTextureMap;
+		pUI->raytracer->m_nTextureMap = data;
+		pUI->raytracer->m_nTextureMap_height = height;
+		pUI->raytracer->m_nTextureMap_width = width;
+	}
 }
 
 void TraceUI::cb_save_image(Fl_Menu_* o, void* v)
@@ -126,6 +149,12 @@ void TraceUI::cb_is_background(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->m_isBackground = bool(((Fl_Check_Button*)o)->value());
 	((TraceUI*)(o->user_data()))->raytracer->m_isBackground = bool(((Fl_Check_Button*)o)->value());
+}
+
+void TraceUI::cb_is_texture_map(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->m_isTextureMap = bool(((Fl_Check_Button*)o)->value());
+	((TraceUI*)(o->user_data()))->raytracer->m_isTextureMap = bool(((Fl_Check_Button*)o)->value());
 }
 
 void TraceUI::cb_render(Fl_Widget* o, void* v)
@@ -270,6 +299,7 @@ Fl_Menu_Item TraceUI::menuitems[] = {
 		{ "&Load Scene...",	FL_ALT + 'l', (Fl_Callback *)TraceUI::cb_load_scene },
 		{ "&Save Image...",	FL_ALT + 's', (Fl_Callback *)TraceUI::cb_save_image },
 		{"&Load Background Image...",0,(Fl_Callback*)TraceUI::cb_load_background_image},
+		{"&Load Texture Map Image...",0,(Fl_Callback*)TraceUI::cb_load_texture_map_image},
 		{ "&Exit",			FL_ALT + 'e', (Fl_Callback *)TraceUI::cb_exit },
 		{ 0 },
 
@@ -339,6 +369,10 @@ TraceUI::TraceUI() {
 		m_checkBackgroundButton->user_data((void*)(this));
 		m_checkBackgroundButton->callback(cb_is_background);
 
+		m_checkBackTextureMapButton = new Fl_Check_Button(100, 190, 150, 25, "Texture Map");
+		m_checkBackTextureMapButton->value(m_isTextureMap);
+		m_checkBackTextureMapButton->user_data((void*)(this));
+		m_checkBackTextureMapButton->callback(cb_is_texture_map);
 
 		m_renderButton = new Fl_Button(240, 27, 70, 25, "&Render");
 		m_renderButton->user_data((void*)(this));

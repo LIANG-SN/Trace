@@ -2,6 +2,8 @@
 
 #include "Sphere.h"
 
+
+
 bool Sphere::intersectLocal( const ray& r, isect& i ) const
 {
 	vec3f v = -r.getPosition();

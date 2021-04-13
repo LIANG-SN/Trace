@@ -11,6 +11,8 @@
 #include "ui/TraceUI.h"
 #include <stack>
 
+#define PI acos(-1)
+
 extern TraceUI* traceUI;
 stack<double> refrac_stack;
 // Trace a top-level ray through normalized window coordinates (x,y)
@@ -49,11 +51,36 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// more steps: add in the contributions from reflected and refracted
 		// rays.
 
+
+
 		const Material& m = i.getMaterial();
 		vec3f rayDirection = r.getDirection().normalize();
 		vec3f N = i.N.normalize();
 		// shade
 		vec3f shade = m.shade(scene, r, i);
+		if (m_isTextureMap)
+		{
+			vec3f local=(*(scene->beginBoundedobjects()))->getTransform()->globalToLocalCoords(r.at(i.t));
+			double rx, ry;
+			vec3f Sp = vec3f(0, -1, 0);
+			vec3f Se = vec3f(0, 0, 1);
+
+			ry = acos(Sp * local.normalize()) / PI;
+
+			rx = acos(Se * local.normalize() / sin(acos(Sp * local.normalize())) / (2 * PI));
+			//cout << rx << " " << ry << endl;
+			
+			vec3f color;
+			int u = m_nTextureMap_width * rx;
+			int v = m_nTextureMap_height * ry;
+			color[0] = *(m_nTextureMap + (u + v * m_nTextureMap_width) * 3 + 0);
+			color[1] = *(m_nTextureMap + (u + v * m_nTextureMap_width) * 3 + 1);
+			color[2] = *(m_nTextureMap + (u + v * m_nTextureMap_width) * 3 + 2);
+			return color.multiply(shade) / 255.0;
+		}
+
+
+
 		if (depth >= traceUI->getDepth())
 			return shade;
 		vec3f finalI = shade;
@@ -344,9 +371,9 @@ void RayTracer::tracePixel( int i, int j )
 	else
 		col = trace(scene, double(i) / double(buffer_width), double(j) / double(buffer_height),i,j);
 
-unsigned char* pixel = buffer + (i + j * buffer_width) * 3;
-		pixel[0] = (int)(255.0 * col[0]);
-		pixel[1] = (int)(255.0 * col[1]);
-		pixel[2] = (int)(255.0 * col[2]);
+	unsigned char* pixel = buffer + (i + j * buffer_width) * 3;
+	pixel[0] = (int)(255.0 * col[0]);
+	pixel[1] = (int)(255.0 * col[1]);
+	pixel[2] = (int)(255.0 * col[2]);
 
 }
