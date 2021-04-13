@@ -4,7 +4,6 @@
 #include "light.h"
 #include "../ui/TraceUI.h"
 extern TraceUI* traceUI;
-
 void BoundingBox::operator=(const BoundingBox& target)
 {
 	min = target.min;
@@ -157,15 +156,21 @@ bool Scene::intersect( const ray& r, isect& i ) const
 	}
 
 	// try the bounded objects
-	for( j = boundedobjects.begin(); j != boundedobjects.end(); ++j ) {
-		if( (*j)->intersect( r, cur ) ) {
-			if( !have_one || (cur.t < i.t) ) {
-				i = cur;
-				have_one = true;
-			}
-		}
+	if (traceUI->use_bvh)
+	{
+		have_one = bvh->intersect(r, i);
 	}
-
+	else
+	{
+	  for( j = boundedobjects.begin(); j != boundedobjects.end(); ++j ) {
+	  	if( (*j)->intersect( r, cur ) ) {
+	  		if( !have_one || (cur.t < i.t) ) {
+	  			i = cur;
+	  			have_one = true;
+	  		}
+	  	}
+	  }
+	}
 
 	return have_one;
 }
@@ -197,4 +202,130 @@ void Scene::initScene()
 		else
 			nonboundedobjects.push_back(*j);
 	}
+	objects.sort([](Geometry* x, Geometry* y) -> bool 
+		{
+			BoundingBox box1 = x->getBoundingBox();
+			BoundingBox box2 = y->getBoundingBox();
+			return box1.min[0] + box1.max[0] < box2.min[0] + box2.max[0]; 
+		} );
+	bvh = new BVH(boundedobjects.begin(), boundedobjects.end());
+}
+
+BVHNode::BVHNode(list<Geometry*>::const_iterator start,
+	list<Geometry*>::const_iterator end, int size)
+	: left(left), right(right)
+{
+	if (size == 1)
+	{
+		obj = (*start);
+		bound = nullptr;
+		left = nullptr;
+		right = nullptr;
+	}
+	else
+	{
+		obj = nullptr;
+
+		// bound = compute bound
+		bound = new BoundingBox;
+		for (list<Geometry*>::const_iterator p = start; p != end; p++)
+		{
+			if (p == start)
+			{
+				(*bound) = (*p)->getBoundingBox();
+			}
+			else
+			{
+				BoundingBox temp = (*p)->getBoundingBox();
+				bound->max = maximum(bound->max, temp.max);
+				bound->min = minimum(bound->min, temp.min);
+			}
+		}
+
+		Scene::cgiter mid = start;
+		std::advance(mid, size / 2);
+
+
+		int size_l = size / 2;
+		int size_r = size - size_l;
+		left = new BVHNode(start, mid, size_l);
+		right = new BVHNode(mid, end, size_r);
+	}
+}
+
+bool BVHNode::intersect(const ray& r, isect& i) const
+{
+	if (bound == nullptr)
+	{
+		return obj->intersect(r, i);
+	}
+	else
+	{
+		double tMin = 0, tMax = 0;
+		if (bound->intersect(r, tMin, tMax))
+		{
+			isect i_left;
+			isect i_right;
+			// intersect left and right
+			bool intersect_l = left->intersect(r, i_left);
+			bool intersect_r = right->intersect(r, i_right);
+
+			if (intersect_l && intersect_r)
+			{
+				if (i_left.t < i_right.t)
+					i = i_left;
+				else
+					i = i_right;
+				return true;
+			}
+			else if (intersect_l)
+			{
+				i = i_left;
+				return true;
+			}
+			else if (intersect_r)
+			{
+				i = i_right;
+				return true;
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+	}
+}
+
+BVHNode::~BVHNode()
+{
+	if (bound != nullptr)
+	{
+		delete left;
+		delete right;
+	}
+}
+
+BVH::BVH(list<Geometry*>::const_iterator begin,
+	list<Geometry*>::const_iterator end)
+{
+	int size = 0;
+	list<Geometry*>::const_iterator p = begin;
+	while (p != end)
+	{
+		size++;
+		p++;
+	}
+
+	root = new BVHNode(begin, end, size);
+}
+
+bool BVH::intersect(const ray& r, isect& i) const
+{
+	// cout << "bvh intersect" << endl;
+	return root->intersect(r, i);
+}
+
+BVH::~BVH()
+{
+	delete root;
 }

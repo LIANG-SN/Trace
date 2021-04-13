@@ -43,6 +43,7 @@ public:
 	Fl_Check_Button* m_adaptive_check;
 	Fl_Slider* m_sample_slider;
 	Fl_Slider* m_adaptive_thresh_slider;
+	Fl_Check_Button* m_bvh_check;
 
 
 	// member functions
@@ -67,6 +68,7 @@ public:
 	bool adaptive_super_sampling{ false };
 	int sample_per_pixel{ 5 };
 	double adaptive_thresh{ 0.1 };
+	bool use_bvh{ true };
 
 private:
 	RayTracer*	raytracer;
@@ -112,6 +114,7 @@ private:
 	static void	cb_adaptive_supersample_check(Fl_Widget* o, void* v);
 	static void cb_sample_slides(Fl_Widget* o, void* v);
 	static void cb_adaptive_thresh_slides(Fl_Widget* o, void* v);
+	static void cb_bvh_check(Fl_Widget* o, void* v);
 };
 
 #endif

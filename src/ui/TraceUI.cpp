@@ -265,6 +265,10 @@ void TraceUI::cb_adaptive_thresh_slides(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->adaptive_thresh = int(((Fl_Slider*)o)->value());
 }
+void TraceUI::cb_bvh_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->use_bvh = bool(((Fl_Check_Button*)o)->value());
+}
 
 void TraceUI::show()
 {
@@ -425,6 +429,11 @@ TraceUI::TraceUI() {
 		m_adaptive_thresh_slider->value(adaptive_thresh);
 		m_adaptive_thresh_slider->align(FL_ALIGN_RIGHT);
 		m_adaptive_thresh_slider->callback(cb_adaptive_thresh_slides);
+
+		m_bvh_check = new Fl_Check_Button(10, 210, 70, 20, "BVH acceleration");
+		m_bvh_check->value(use_bvh);
+		m_bvh_check->user_data((void*)(this));
+		m_bvh_check->callback(cb_bvh_check);
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);
