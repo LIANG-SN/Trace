@@ -24,7 +24,7 @@ public:
 	void tracePixel( int i, int j );
 	vec3f RayTracer::adaptiveSample(double center_x, double center_y,
 		double range_x, double range_y, int& num_samples);
-
+	void loadHeightField();
 
 
 	bool loadScene( char* fn );
