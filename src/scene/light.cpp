@@ -18,7 +18,7 @@ vec3f DirectionalLight::shadowAttenuation( const vec3f& P ) const
 	ray r(P, d);
 	vec3f atten;
 	if (scene->intersect(r, i))
-		atten = i.obj->getMaterial().kt;
+		atten = i.obj->getMaterial().kt.multiply(shadowAttenuation(r.at(i.t)));
 	else atten = { 1, 1, 1 };
 
 	return atten;
@@ -76,7 +76,7 @@ vec3f PointLight::shadowAttenuation(const vec3f& P) const
 		if (PQ.length() < PL.length())
 		{
 			
-			atten = i.obj->getMaterial().kt;
+			atten = i.obj->getMaterial().kt.multiply(shadowAttenuation(Q));
 		}
 		else
 			atten = { 1, 1, 1 };
@@ -125,10 +125,92 @@ vec3f SpotLight::getDirection(const vec3f& P) const
 	return -direction;
 }
 
+vec3f ShapeLight::shadowAttenuation(const vec3f& P) const
+{
+	vec3f atten;
+	double x = P[0] - position[0];
+	double y = P[2] - position[2];
+	if (type == 0)
+	{
+		double length = 0.5;
+		if (x < length / 2  && x > -length / 2 && y < length / 2 && y > -length / 2)
+		{
+			
+			vec3f d = -direction;
+			isect i;
+			ray r(P, d);
+			if (scene->intersect(r, i))
+			{
+				atten = i.obj->getMaterial().kt;
+			}
+			else
+
+			{
+				atten = { 1, 1, 1 };
+				
+			}
+		}
+		else
+			atten = { 0, 0, 0 };
+	    
+	}
+	else if (type == 1)
+	{
+		double t = 0.5;
+		if (y > - t / 2 && y < sqrt(3) * x + t && y < -sqrt(3) * x + t) // in
+		{
+			vec3f d = -direction.normalize();
+			isect i;
+			ray r(P, d);
+			if (scene->intersect(r, i))
+				atten = i.obj->getMaterial().kt;
+			else atten = { 1, 1, 1 };
+		}
+		else
+			atten = { 0, 0, 0 };
+	}
+	else if (type == 2)
+	{
+		double t = 0.5;
+		if ((y > -t / 2 && y < sqrt(3) * x + t && y < -sqrt(3) * x + t)
+			|| (y < t / 2 && y > sqrt(3) * x - t && y > -sqrt(3) * x - t)) // in
+		{
+			vec3f d = -direction.normalize();
+			isect i;
+			ray r(P, d);
+			if (scene->intersect(r, i))
+				atten = i.obj->getMaterial().kt;
+			else atten = { 1, 1, 1 };
+		}
+		else
+			atten = { 0, 0, 0 };
+	}
+	else 
+		atten = { 0, 0, 0 };
+	return atten;
+}
+
+double ShapeLight::distanceAttenuation(const vec3f& P) const
+{
+	return 1.0;
+}
+
+vec3f ShapeLight::getColor(const vec3f& P) const
+{
+	return color;
+}
+
+vec3f ShapeLight::getDirection(const vec3f& P) const
+{
+	return -direction;
+}
+
+
 double SpotLight::getRadius() const
 {
 	return radius;
 }
+
 
 vec3f AmbientLight::getColor(const vec3f& P) const
 {

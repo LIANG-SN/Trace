@@ -536,6 +536,16 @@ static void processObject( Obj *obj, Scene *scene, mmap& materials )
 			tupleToVec(getField(child, "edgeplace"))[0],
 			tupleToVec(getColorField(child))));
 	}
+	else if (name == "shape_light") {
+		if (child == NULL) {
+			throw ParseError("No info for shape_light");
+		}
+		scene->add(new ShapeLight(scene,
+			tupleToVec(getField(child, "position")),
+			tupleToVec(getField(child, "direction")).normalize(),
+			tupleToVec(getField(child, "type"))[0],
+			tupleToVec(getColorField(child))));
+	}
 	else if( name == "point_light" ) {
 		if( child == NULL ) {
 			throw ParseError( "No info for point_light" );
