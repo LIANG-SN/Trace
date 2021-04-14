@@ -333,6 +333,11 @@ void TraceUI::cb_bvh_check(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->use_bvh = bool(((Fl_Check_Button*)o)->value());
 }
+void TraceUI::cb_soft_shadow_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->soft_shadow = bool(((Fl_Check_Button*)o)->value());
+}
+
 
 void TraceUI::show()
 {
@@ -510,6 +515,11 @@ TraceUI::TraceUI() {
 		m_bvh_check->value(use_bvh);
 		m_bvh_check->user_data((void*)(this));
 		m_bvh_check->callback(cb_bvh_check);
+
+		m_soft_shadow_check = new Fl_Check_Button(10, 230, 70, 20, "Soft shadow");
+		m_soft_shadow_check->value(soft_shadow);
+		m_soft_shadow_check->user_data((void*)(this));
+		m_soft_shadow_check->callback(cb_soft_shadow_check);
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);

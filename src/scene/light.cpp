@@ -1,6 +1,9 @@
 #include <cmath>
 
 #include "light.h"
+#include "../ui/TraceUI.h"
+
+extern TraceUI* traceUI;
 
 double DirectionalLight::distanceAttenuation( const vec3f& P ) const
 {
@@ -62,27 +65,63 @@ vec3f PointLight::shadowAttenuation(const vec3f& P) const
 {
     // YOUR CODE HERE:
     // You should implement shadow-handling code here.
+	vec3f atten;
+	if (traceUI->soft_shadow)
+	{
+		double t = 0.5;
+		vec3f soft_atten(0, 0, 0);
+		for (int i = 0; i < 10; i++)
+		{
+			for (int j = 0; j < 10; j++)
+			{
+				vec3f soft_pos(position[0] - t / 2 + (i / 10.0) * t,
+					position[1], position[2] - t / 2 + (j / 10.0) * t);
+				vec3f d = (soft_pos - P).normalize();
+				isect i;
+				ray r(P, d);
+				if (!scene->intersect(r, i))
+					soft_atten += { 1, 1, 1 };
+				else
+				{
+
+					vec3f Q = r.at(i.t);
+					vec3f PQ = Q - P;
+					vec3f PL = position - P;
+					if (PQ.length() < PL.length())
+						soft_atten += i.obj->getMaterial().kt;
+					else
+						soft_atten += { 1, 1, 1 };
+
+					if (i.t < RAY_EPSILON)
+						soft_atten += { 1, 1, 1 };
+				}
+
+			}
+		}
+		atten = soft_atten / 100;
+	}
+	else
+	{
 	vec3f d = (position - P).normalize();
 	isect i;
 	ray r(P, d);
-	vec3f atten;
+	
 	if (! scene->intersect(r, i))
 		atten = { 1, 1, 1 };
 	else
 	{
-		vec3f Q = r.at(i.t);
-		vec3f PQ = Q - P;
-		vec3f PL = position - P;
-		if (PQ.length() < PL.length())
-		{
-			
-			atten = i.obj->getMaterial().kt.multiply(shadowAttenuation(Q));
-		}
-		else
-			atten = { 1, 1, 1 };
-
-		if(i.t< RAY_EPSILON)
-			atten = { 1, 1, 1 };
+		
+		  vec3f Q = r.at(i.t);
+		  vec3f PQ = Q - P;
+		  vec3f PL = position - P;
+		  if (PQ.length() < PL.length())
+		  	atten = i.obj->getMaterial().kt.multiply(shadowAttenuation(Q));
+		  else
+		  	atten = { 1, 1, 1 };
+		  
+		  if(i.t< RAY_EPSILON)
+		  	atten = { 1, 1, 1 };
+	}
 	}
 	return atten;
 }
