@@ -9,8 +9,10 @@
 #include "fileio/read.h"
 #include "fileio/parse.h"
 #include "ui/TraceUI.h"
+#include "SceneObjects/trimesh.h"
 #include "SceneObjects/Sphere.h"
 #include "SceneObjects/Square.h"
+#include "SceneObjects/Box.h"
 #include <stack>
 
 
@@ -253,6 +255,77 @@ bool RayTracer::loadScene( char* fn )
 	buffer = new unsigned char[ bufferSize ];
 	visualize_sample_buffer = new unsigned char[bufferSize / 3];
 	
+	// add height field here
+	if (traceUI->height_field && m_nHeight_field)
+	{
+		Material* m = new Material();
+		m->ka = vec3f(0.3, 0.3, 0.3);
+		m->kd = vec3f(0.8, 0.3, 0.1);
+		m->ks = vec3f(0.9, 0.4, 0.0);
+		m->shininess = 0.6;
+		
+		Trimesh* trimesh = new Trimesh(scene, m, &scene->transformRoot);
+
+		double scale = 3;
+		for (int w = 0; w < m_nHeight_field_width - 1; w++)
+		{
+			for (int h = 0; h < m_nHeight_field_height - 1; h++)
+			{
+				double y1 = 
+					  (*(m_nHeight_field + (h * (m_nHeight_field_width)+w) * 3) * 0.299
+					+ *(m_nHeight_field + (h * (m_nHeight_field_width)+w) * 3 + 1) * 0.587
+					+ *(m_nHeight_field + (h * (m_nHeight_field_width)+w) * 3 + 2) * 0.114)
+					/ 255.0 * scale;
+				double y2 =
+						(*(m_nHeight_field + (h * (m_nHeight_field_width)+ w+1) * 3) * 0.299
+						+ *(m_nHeight_field + (h * (m_nHeight_field_width)+w+1) * 3 + 1) * 0.587
+						+ *(m_nHeight_field + (h * (m_nHeight_field_width)+w+1) * 3 + 2) * 0.114)
+					/ 255.0 * scale;
+				double y3 =
+						 (*(m_nHeight_field + ((h+1) * (m_nHeight_field_width)+w+1) * 3) * 0.299
+						+ *(m_nHeight_field + ((h+1) * (m_nHeight_field_width)+w+1) * 3 + 1) * 0.587
+						+ *(m_nHeight_field + ((h+1) * (m_nHeight_field_width)+w+1) * 3 + 2) * 0.114)
+					/ 255.0 * scale;
+				double y4 =
+						 (*(m_nHeight_field + ((h+1) * (m_nHeight_field_width)+w) * 3) * 0.299
+						+ *(m_nHeight_field + ((h+1) * (m_nHeight_field_width)+w) * 3 + 1) * 0.587
+						+ *(m_nHeight_field + ((h+1) * (m_nHeight_field_width)+w) * 3 + 2) * 0.114)
+					/ 255.0 * scale;
+
+				vec3f p1((double)h / (m_nHeight_field_height - 1) * scale, y1,
+					(double)w / (m_nHeight_field_width - 1) * scale);
+				vec3f p2((double)(h) / (m_nHeight_field_height - 1) * scale, y2,
+					(double)(w+1) / (m_nHeight_field_width - 1) * scale);
+				vec3f p3((double)(h+1) / (m_nHeight_field_height - 1) * scale, y3,
+					(double)(w+1) / (m_nHeight_field_width - 1) * scale);
+				vec3f p4((double)(h+1) / (m_nHeight_field_height - 1) * scale, y4,
+					(double)(w) / (m_nHeight_field_width - 1) * scale);
+
+				trimesh->addVertex(p1);
+				trimesh->addVertex(p2);
+				trimesh->addVertex(p3);
+
+				trimesh->addVertex(p1);
+				trimesh->addVertex(p3);
+				trimesh->addVertex(p4);
+				
+			}
+		}
+		// add all faces
+		for (int i = 0; i < (m_nHeight_field_height - 1) 
+			* (m_nHeight_field_width - 1) * 2; i++)
+		{
+			trimesh->addFace(i * 3 , i * 3 + 1, i * 3 + 2);
+		}
+		cout << trimesh->faces.size() << endl;
+		trimesh->generateNormals();
+
+		char* error;
+		if (error = trimesh->doubleCheck())
+			throw ParseError(error);
+		scene->add(trimesh);
+	}
+
 	// separate objects into bounded and unbounded
 	scene->initScene();
 	

@@ -47,6 +47,10 @@ public:
 	int			   m_nSolidTexture_height = 0;
 	unsigned char* m_nSolidTexture = NULL;
 
+	int			   m_nHeight_field_width = 0;
+	int			   m_nHeight_field_height = 0;
+	unsigned char* m_nHeight_field = nullptr;
+
 	bool		   m_isBackground = false;
 	bool		   m_isTextureMap = false;
 	bool		   m_isBumpMap = false;

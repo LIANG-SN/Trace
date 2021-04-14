@@ -11,6 +11,7 @@ class TrimeshFace;
 
 class Trimesh : public MaterialSceneObject
 {
+public:
     friend class TrimeshFace;
     typedef vector<vec3f> Normals;
     typedef vector<vec3f> Vertices;
@@ -43,6 +44,7 @@ public:
 
 class TrimeshFace : public MaterialSceneObject
 {
+public:
     Trimesh *parent;
     int ids[3];
 public:
