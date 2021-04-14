@@ -19,6 +19,8 @@
 #include "../SceneObjects/Cylinder.h"
 #include "../SceneObjects/Sphere.h"
 #include "../SceneObjects/Square.h"
+#include "../SceneObjects/Paraboloid.h"
+#include "../SceneObjects/Hyperbolic.h"
 #include "../scene/light.h"
 
 typedef map<string,Material*> mmap;
@@ -133,6 +135,7 @@ static Obj *getField( Obj *obj, const string& name )
 		throw ParseError( string( "Object contains no field named \"" ) +
 			name + "\"" );
 	}
+	
 
 	const dict& d = obj->getDict();
 	dict::const_iterator i; 
@@ -322,7 +325,13 @@ static void processGeometry( string name, Obj *child, Scene *scene,
 			obj = new Cone( scene, mat, height, bottom_radius, top_radius, capped );
 		} else if( name == "square" ) {
 			obj = new Square( scene, mat );
+		} else if (name == "paraboloid") {
+			obj = new Paraboloid(scene, mat);
 		}
+		else if (name == "hyperbolic") {
+			obj = new Hyperbolic(scene, mat);
+		}
+
 
         obj->setTransform(transform);
 		scene->add(obj);
@@ -582,7 +591,9 @@ static void processObject( Obj *obj, Scene *scene, mmap& materials )
 				name == "scale" ||
 				name == "transform" ||
                 name == "trimesh" ||
-                name == "polymesh") { // polymesh is for backwards compatibility.
+                name == "polymesh" ||
+				name == "paraboloid" ||
+				name == "hyperbolic") { // polymesh is for backwards compatibility.
 		processGeometry( name, child, scene, materials, &scene->transformRoot);
 		//scene->add( geo );
 	} else if( name == "material" ) {
