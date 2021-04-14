@@ -44,6 +44,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 	isect i;
 	
 	if( scene->intersect( r, i ) ) {
+		//cout << r.at(i.t) << endl;
 		// YOUR CODE HERE
 
 		// An intersection occured!  We've got work to do.  For now,
@@ -64,9 +65,11 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		vec3f shade = m.shade(scene, r, i);
 
 
+		//cout << shade[0] << endl;
 		if (depth >= traceUI->getDepth())
 			return shade;
-		vec3f finalI = shade;
+		vec3f finalI = 20*shade;
+
 
 		if (shade[0] < thresh[0] && shade[1] < thresh[1] && shade[2] < thresh[2])
 			return finalI;
@@ -119,6 +122,8 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		    }
 
 		}
+
+
 
 		return finalI;
 	
@@ -179,6 +184,9 @@ RayTracer::~RayTracer()
 {
 	delete [] buffer;
 	delete [] m_nBackground;
+	delete [] m_nBumpMap;
+	delete [] m_nTextureMap;
+	delete [] m_nSolidTexture;
 	delete [] visualize_sample_buffer;
 	delete scene;
 }
@@ -224,7 +232,6 @@ void RayTracer::setSceneTextureMap()
 
 void RayTracer::setSceneSolidTexture()
 {
-	cout << 1 << endl;
 	scene->m_nSolidTexture_width = m_nSolidTexture_width;
 	scene->m_nSolidTexture_height = m_nSolidTexture_height;
 	scene->m_nSolidTexture = m_nSolidTexture;
