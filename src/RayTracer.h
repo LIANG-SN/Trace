@@ -24,8 +24,7 @@ public:
 	void tracePixel( int i, int j );
 	vec3f RayTracer::adaptiveSample(double center_x, double center_y,
 		double range_x, double range_y, int& num_samples);
-
-
+	void loadHeightField();
 
 	bool loadScene( char* fn );
 
@@ -46,6 +45,10 @@ public:
 	int			   m_nSolidTexture_width = 0;
 	int			   m_nSolidTexture_height = 0;
 	unsigned char* m_nSolidTexture = NULL;
+
+	int			   m_nHeight_field_width = 0;
+	int			   m_nHeight_field_height = 0;
+	unsigned char* m_nHeight_field = nullptr;
 
 	bool		   m_isBackground = false;
 	bool		   m_isTextureMap = false;

@@ -79,6 +79,23 @@ protected:
 	vec3f direction;
 	double radius;
 };
+class ShapeLight
+	: public Light
+{
+public:
+	ShapeLight(Scene* scene, const vec3f& pos, const vec3f& dir, int type,
+		const vec3f& color
+	)
+		: Light(scene, color), position(pos), direction(dir), type(type) {};
+	virtual vec3f shadowAttenuation(const vec3f& P) const;
+	virtual double distanceAttenuation(const vec3f& P) const;
+	virtual vec3f getColor(const vec3f& P) const;
+	virtual vec3f getDirection(const vec3f& P) const;
+protected:
+	vec3f position;
+	vec3f direction;
+	int type;
+};
 
 class AmbientLight
 	: public Light

@@ -138,6 +138,30 @@ void TraceUI::cb_load_solid_texture_image(Fl_Menu_* o, void* v)
 	}
 }
 
+void TraceUI::cb_load_height_field_image(Fl_Menu_* o, void* v)
+{
+	TraceUI* pUI = whoami(o);
+
+	char* newfile = fl_file_chooser("load Height field Image?", "*.bmp", NULL);
+	if (newfile != NULL) {
+		unsigned char* data;
+		int				width, height;
+
+		if ((data = readBMP(newfile, width, height)) == NULL)
+		{
+			fl_alert("Can't load bitmap file");
+			return;
+		}
+		if (pUI->raytracer->m_nHeight_field != NULL)
+			delete[] pUI->raytracer->m_nHeight_field;
+		pUI->raytracer->m_nHeight_field = data;
+		pUI->raytracer->m_nHeight_field_height = height;
+		pUI->raytracer->m_nHeight_field_width = width;
+		cout << "loaded" << endl;
+		// pUI->raytracer->setSceneTextureMap(); // set?
+	}
+}
+
 void TraceUI::cb_save_image(Fl_Menu_* o, void* v)
 {
 	TraceUI* pUI = whoami(o);
@@ -333,6 +357,14 @@ void TraceUI::cb_bvh_check(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->use_bvh = bool(((Fl_Check_Button*)o)->value());
 }
+void TraceUI::cb_soft_shadow_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->soft_shadow = bool(((Fl_Check_Button*)o)->value());
+}
+void TraceUI::cb_height_field_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->height_field = bool(((Fl_Check_Button*)o)->value());
+}
 
 void TraceUI::show()
 {
@@ -370,7 +402,8 @@ Fl_Menu_Item TraceUI::menuitems[] = {
 		{"&Load Texture Map Image...",0,(Fl_Callback*)TraceUI::cb_load_texture_map_image},
 		{"&Load Bump Map Image...",0,(Fl_Callback*)TraceUI::cb_load_bump_map_image},
 		{"&Load Solid Texture Image...",0,(Fl_Callback*)TraceUI::cb_load_solid_texture_image},
-		{ "&Exit",			FL_ALT + 'e', (Fl_Callback *)TraceUI::cb_exit },
+		{"&Load Height Field Image...",0,(Fl_Callback*)TraceUI::cb_load_height_field_image},
+	{ "&Exit",			FL_ALT + 'e', (Fl_Callback *)TraceUI::cb_exit },
 		{ 0 },
 
 	{ "&Help",		0, 0, 0, FL_SUBMENU },
@@ -510,6 +543,16 @@ TraceUI::TraceUI() {
 		m_bvh_check->value(use_bvh);
 		m_bvh_check->user_data((void*)(this));
 		m_bvh_check->callback(cb_bvh_check);
+
+		m_soft_shadow_check = new Fl_Check_Button(10, 230, 70, 20, "Soft shadow");
+		m_soft_shadow_check->value(soft_shadow);
+		m_soft_shadow_check->user_data((void*)(this));
+		m_soft_shadow_check->callback(cb_soft_shadow_check);
+
+		m_height_field_check = new Fl_Check_Button(10, 250, 70, 20, "Height field");
+		m_height_field_check->value(height_field);
+		m_height_field_check->user_data((void*)(this));
+		m_height_field_check->callback(cb_height_field_check);
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);

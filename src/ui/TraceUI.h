@@ -46,7 +46,8 @@ public:
 	Fl_Slider* m_sample_slider;
 	Fl_Slider* m_adaptive_thresh_slider;
 	Fl_Check_Button* m_bvh_check;
-
+	Fl_Check_Button* m_soft_shadow_check;
+	Fl_Check_Button* m_height_field_check;
 
 	// member functions
 	void show();
@@ -72,6 +73,8 @@ public:
 	int sample_per_pixel{ 5 };
 	double adaptive_thresh{ 0.1 };
 	bool use_bvh{ true };
+	bool soft_shadow{ false };
+	bool height_field{ false };
 
 private:
 	RayTracer*	raytracer;
@@ -97,6 +100,8 @@ private:
 	static void cb_load_texture_map_image(Fl_Menu_* o, void* v);
 	static void cb_load_bump_map_image(Fl_Menu_* o, void* v);
 	static void cb_load_solid_texture_image(Fl_Menu_* o, void* v);
+	static void cb_load_height_field_image(Fl_Menu_* o, void* v);
+
 	static void cb_exit(Fl_Menu_* o, void* v);
 	static void cb_about(Fl_Menu_* o, void* v);
 
@@ -121,6 +126,8 @@ private:
 	static void cb_sample_slides(Fl_Widget* o, void* v);
 	static void cb_adaptive_thresh_slides(Fl_Widget* o, void* v);
 	static void cb_bvh_check(Fl_Widget* o, void* v);
+	static void cb_soft_shadow_check(Fl_Widget* o, void* v);
+	static void cb_height_field_check(Fl_Widget* o, void* v);
 };
 
 #endif

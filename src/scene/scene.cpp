@@ -335,6 +335,7 @@ BVHNode::~BVHNode()
 {
 	if (bound != nullptr)
 	{
+		delete bound;
 		delete left;
 		delete right;
 	}
