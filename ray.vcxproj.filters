@@ -120,6 +120,9 @@
     <ClCompile Include="src\SceneObjects\Hyperbolic.cpp">
       <Filter>Source Files\SceneObjects</Filter>
     </ClCompile>
+    <ClCompile Include="src\SceneObjects\Metaball.cpp">
+      <Filter>Source Files\SceneObjects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\RayTracer.h">
@@ -180,6 +183,9 @@
       <Filter>Header Files\SceneObjects.</Filter>
     </ClInclude>
     <ClInclude Include="src\SceneObjects\Hyperbolic.h">
+      <Filter>Header Files\SceneObjects.</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SceneObjects\Metaball.h">
       <Filter>Header Files\SceneObjects.</Filter>
     </ClInclude>
   </ItemGroup>

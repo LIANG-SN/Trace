@@ -6,57 +6,45 @@ SBT-raytracer 1.0
 
 camera
 {
-	position = (5, 6, 5);
-	viewdir = (-5, -6, -5);
-	updir = (1, 0, 0);
+	position = (5, 0, 0);
+	viewdir = (-1, 0, 0);
+	updir = (0, 0, 1);
 }
 
-point_light
+directional_light
 {
-	position = (5, 5, 5);
-	colour = (1.0, 1.0, 1.0);
-
-}
-
-point_light
-{
-	position = (0, 3, 0);
-	colour = (1.0, 1.0, 1.0);
-
-}
-
-point_light
-{
-	position = (-5, 5, -5);
-	colour = (1.0, 1.0, 1.0);
-
+	direction = (-1, -1, -0.2);
+	color = (1, 1, 1);
 }
 
 
 
 metaball {
-	material = { 
-		diffuse = (1.0, 1.0, 1.0);
-		ambient=( 0.2,0.6,0.8);
-		transmissive = (0.8, 0.8, 0.8);
-		index = 2.0;
-	};
-
-	gridSize = 30;
-	size = 3.0;
-
-	ball = ((0,0,0,1.0),(1.5,-1.5,1.5,1),(-1.5,-1.5,1.5,1));
+ material = { 
+  diffuse = (0,0.8,0.8);
+  transmissive = (0.7, 0.7, 0.7);
+  index = 1.5;
+ };
+ balls = ((1.5,0,0.25,-0.5),(1.5,0,0.25,0.5),(1.5,0,-0.4,0));
 }
 
-translate(0,-3.0,0.0,
-rotate(1,0,0,-1.57,
-scale(10.0,
-square {
-  material={
-    diffuse=( 0.8,0.8,0.3);
-    ambient=( 0.2,0.2,0.2);
-    emissive=( 0,0,0);
-    shininess=1;
-    transmissive=( 0,0,0 );
-  }
-})))
+// Add a couple of crossed cylinders behind the sphere to
+// see the refractive effect.
+translate( -2, -1, -10,
+scale( 0.2, 0.2, 20,
+	cylinder {
+		material = { diffuse = (0.8, 0.4, 0); specular = (0.7, 0.7, 0.7); }
+	} ) )
+
+
+translate( 0, 0.5, 0, 
+rotate( 1, 0, 0, 0.6,
+translate( -2, -1, -10,
+scale( 0.2, 0.2, 20,
+	cylinder {
+		material = { diffuse = (0.8, 0, 0.4); specular = (0.7, 0.7, 0.7); }
+	} ) ) ) )
+
+
+
+

@@ -22,6 +22,7 @@
 #include "../SceneObjects/Paraboloid.h"
 #include "../SceneObjects/Hyperbolic.h"
 #include "../scene/light.h"
+#include "../SceneObjects/Metaball.h"
 
 typedef map<string,Material*> mmap;
 
@@ -38,6 +39,8 @@ static void processCamera( Obj *child, Scene *scene );
 static Material *getMaterial( Obj *child, const mmap& bindings );
 static Material *processMaterial( Obj *child, mmap *bindings = NULL );
 static void verifyTuple( const mytuple& tup, size_t size );
+
+static void addBallToMetaballs(Obj* child, Metaball* mball);
 
 Scene *readScene( const string& filename )
 {
@@ -331,6 +334,10 @@ static void processGeometry( string name, Obj *child, Scene *scene,
 		else if (name == "hyperbolic") {
 			obj = new Hyperbolic(scene, mat);
 		}
+		else if (name == "metaball") {
+			obj = new Metaball(scene, mat);
+			addBallToMetaballs(getField(child, "balls"), dynamic_cast<Metaball*>(obj));
+		}
 
 
         obj->setTransform(transform);
@@ -583,7 +590,8 @@ static void processObject( Obj *obj, Scene *scene, mmap& materials )
                 name == "trimesh" ||
                 name == "polymesh" ||
 				name == "paraboloid" ||
-				name == "hyperbolic") { // polymesh is for backwards compatibility.
+				name == "hyperbolic" ||
+				name == "metaball") { // polymesh is for backwards compatibility.
 		processGeometry( name, child, scene, materials, &scene->transformRoot);
 		//scene->add( geo );
 	} else if( name == "material" ) {
@@ -592,5 +600,17 @@ static void processObject( Obj *obj, Scene *scene, mmap& materials )
 		processCamera( child, scene );
 	} else {
 		throw ParseError( string( "Unrecognized object: " ) + name );
+	}
+}
+
+static void addBallToMetaballs(Obj* child, Metaball* mball)
+{
+	mytuple balls = child->getTuple();
+	for (mytuple::iterator i = balls.begin(); i != balls.end(); i++)
+	{
+		mytuple ball = (*i)->getTuple();
+		double r = ball[0]->getScalar();
+		vec3f p = vec3f(ball[1]->getScalar(), ball[2]->getScalar(), ball[3]->getScalar());
+		mball->addBall(p, r);
 	}
 }

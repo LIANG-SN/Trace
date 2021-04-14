@@ -44,7 +44,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 	isect i;
 	
 	if( scene->intersect( r, i ) ) {
-		//cout << r.at(i.t) << endl;
+
 		// YOUR CODE HERE
 
 		// An intersection occured!  We've got work to do.  For now,
@@ -64,11 +64,11 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// shade
 		vec3f shade = m.shade(scene, r, i);
 
-
+		
 		//cout << shade[0] << endl;
 		if (depth >= traceUI->getDepth())
 			return shade;
-		vec3f finalI = 20*shade;
+		vec3f finalI = shade;
 
 
 		if (shade[0] < thresh[0] && shade[1] < thresh[1] && shade[2] < thresh[2])
