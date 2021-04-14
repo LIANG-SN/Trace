@@ -26,7 +26,6 @@ public:
 		double range_x, double range_y, int& num_samples);
 	void loadHeightField();
 
-
 	bool loadScene( char* fn );
 
 	bool sceneLoaded();

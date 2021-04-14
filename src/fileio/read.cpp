@@ -8,7 +8,7 @@
 #include <strstream>
 
 #include <vector>
-
+#include <math.h>
 #include "read.h"
 #include "parse.h"
 
@@ -22,6 +22,10 @@
 #include "../SceneObjects/Paraboloid.h"
 #include "../SceneObjects/Hyperbolic.h"
 #include "../scene/light.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 typedef map<string,Material*> mmap;
 
@@ -296,7 +300,71 @@ static void processGeometry( string name, Obj *child, Scene *scene,
                                                              l4[3]->getScalar() ) ) ) );
 	} else if( name == "trimesh" || name == "polymesh" ) { // 'polymesh' is for backwards compatibility
         processTrimesh( name, child, scene, materials, transform);
-    } else {
+    }
+	else if (name == "particle")
+	{
+		// load particles
+		Material* mat;
+		mat = getMaterial(getField(child, "material"), materials);
+		vec3f dir = tupleToVec(getField(child, "direction"));
+		vec3f startColorMin = tupleToVec(getField(child, "startColorMin"));
+		vec3f startColorMax = tupleToVec(getField(child, "startColorMax"));
+		vec3f endColorMin = tupleToVec(getField(child, "endColorMin"));
+		vec3f endColorMax = tupleToVec(getField(child, "endColorMax"));
+		double angleBiasMax = getField(child, "angleBiasMax")->getScalar(); // in degree
+		int minLife = getField(child, "minLife")->getScalar();
+		int maxLife = getField(child, "maxLife")->getScalar();
+		int numEmit = getField(child, "numEmit")->getScalar();
+		int maxNumParticles = getField(child, "maxNumParticles")->getScalar();
+		double maxSpeed = getField(child, "maxSpeed")->getScalar();
+		double minSpeed = getField(child, "minSpeed")->getScalar();
+		// parameter lists over particles
+		int* life = new int[numEmit];
+		vec3f* startColor = new vec3f[numEmit];
+		vec3f* endColor = new vec3f[numEmit];
+		double* speed = new double[numEmit];
+		double* angleBias = new double[numEmit]; // in fact angle
+		for (int i = 0; i < numEmit; i++)
+		{
+			life[i] = rand() % (maxLife - minLife) + minLife;
+			double colorBias = (rand() % 100) / 99.0;
+			startColor[i] = startColorMin + colorBias * (startColorMax - startColorMin);
+			endColor[i] = endColorMin + colorBias * (endColorMax - endColorMin);
+			double speedBias = (rand() % 100) / 99.0;
+			speed[i] = minSpeed + speedBias * (maxSpeed - minSpeed);
+			double angleBiasBias = (rand() % 100) / 99.0;
+			angleBias[i] = 45 + (-angleBiasMax) + angleBiasBias * (angleBiasMax - (-angleBiasMax));
+			angleBias[i] = angleBias[i] / 180.0 * M_PI; // to radian
+		}
+		double r = 0.01;
+		for (int t = 0; t < maxLife; t++)
+		{
+			for (int i = 0; i < numEmit; i++)
+			{
+				if (life[i] < t)
+				{
+					continue;
+				}
+				else
+				{
+					vec3f pos(cos(angleBias[i]) * t * speed[i], sin(angleBias[i]) * t * speed[i], 0);
+					vec3f color = startColor[i] + (endColor[i] - startColor[i]) / life[i];
+					Material* m = new Material;
+					m->ka = mat->ka;
+					m->kd = color;
+					// set mat color(kd)
+					SceneObject* obj = new Sphere(scene, m);
+					TransformNode*  trans = transform->createChild(mat4f::scale(vec3f(r, r, r)));
+					trans = trans->createChild(mat4f::translate(pos));
+					obj->setTransform(trans);
+					scene->add(obj);
+				}
+
+			}
+		}
+		
+	}
+	else {
 		SceneObject *obj = NULL;
        	Material *mat;
         
@@ -331,6 +399,7 @@ static void processGeometry( string name, Obj *child, Scene *scene,
 		else if (name == "hyperbolic") {
 			obj = new Hyperbolic(scene, mat);
 		}
+		
 
 
         obj->setTransform(transform);
@@ -593,7 +662,8 @@ static void processObject( Obj *obj, Scene *scene, mmap& materials )
                 name == "trimesh" ||
                 name == "polymesh" ||
 				name == "paraboloid" ||
-				name == "hyperbolic") { // polymesh is for backwards compatibility.
+				name == "hyperbolic" ||
+				name == "particle") { // polymesh is for backwards compatibility.
 		processGeometry( name, child, scene, materials, &scene->transformRoot);
 		//scene->add( geo );
 	} else if( name == "material" ) {

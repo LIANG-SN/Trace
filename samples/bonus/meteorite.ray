@@ -33,7 +33,7 @@ point_light
 }
 
 
-meteorite{
+particle{
 	material = {
 		diffuse=( 0.3,0.3,0.3);
    	 	ambient=( 0.2,0.2,0.2);
@@ -46,12 +46,15 @@ meteorite{
 	startColorMax = (0.9,0.9,0.4);
 	endColorMin = (0.4,0.4,0.1);
 	endColorMax = (0.6,0.6,0.2);
-	force = 0.05;
+	angleBiasMax = 20;
 	minLife = 60;
 	maxLife = 80;
-	numEmit = 200; 
+	// numEmit = 200; 
+	numEmit = 100;
 	maxNumParticles = 60000;
-	maxSpeed = 0.05;
-	minSpeed = 0.005; 
+	// maxSpeed = 0.05;
+	// minSpeed = 0.005; 
+	maxSpeed = 5;
+	minSpeed = 0.5; 
 }
 
