@@ -54,20 +54,20 @@ public:
 		BoundingBox localbounds;
 		localbounds.min = vec3f(-1.0f, -1.0f, 0.0f);
 		localbounds.max = vec3f(1.0f, 1.0f, 1.0f);
-		//iter end = scene->endObjects();
-		//if(end!= object_start)
-		//	end--;
-		//for (iter i = object_start; i != end; i++)
-		//{
-		//	for (int a = 0; a < 3; a++)
-		//	{
-		//		if ((*i)->getBoundingBox().min[a] < localbounds.min[a])
-		//			localbounds.min[a] = (*i)->getBoundingBox().min[a];
-		//		if ((*i)->getBoundingBox().max[a] > localbounds.max[a])
-		//			localbounds.max[a] = (*i)->getBoundingBox().max[a];
-		//	}
+		iter end = scene->endObjects();
+		if(end!= object_start)
+			end--;
+		for (iter i = object_start; i != end; i++)
+		{
+			for (int a = 0; a < 3; a++)
+			{
+				if ((*i)->getBoundingBox().min[a] < localbounds.min[a])
+					localbounds.min[a] = (*i)->getBoundingBox().min[a];
+				if ((*i)->getBoundingBox().max[a] > localbounds.max[a])
+					localbounds.max[a] = (*i)->getBoundingBox().max[a];
+			}
 
-		//}
+		}
 		return localbounds;
 	}
 

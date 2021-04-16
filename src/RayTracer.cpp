@@ -176,7 +176,8 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		    else // exit an object
 		    {
 		    	n_i = m.index;
-				refrac_stack.pop();
+				if(!refrac_stack.empty())
+					refrac_stack.pop();
 		    	n_t = refrac_stack.empty() ? 1 : refrac_stack.top();
 		    	N *= -1;
 		    }

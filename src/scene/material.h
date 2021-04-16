@@ -24,7 +24,7 @@ public:
         , kr( vec3f( 0.0, 0.0, 0.0 ) )
         , kt( vec3f( 0.0, 0.0, 0.0 ) )
         , shininess( 0.0 ) 
-		, index(1.0) {}
+		, index(1.0), m(1.0) {}
 
     Material( const vec3f& e, const vec3f& a, const vec3f& s, 
               const vec3f& d, const vec3f& r, const vec3f& t, double sh, double in)
@@ -41,7 +41,7 @@ public:
     
     double shininess;
     double index;               // index of refraction
-
+    double m=1.0;                   // how rough the surface is
     
                                 // material with zero coeffs for everything
                                 // as opposed to the "default" material which is

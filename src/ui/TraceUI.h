@@ -54,6 +54,8 @@ public:
 	Fl_Check_Button* m_depth_field_check;
 	Fl_Slider* m_focal_Slider;
 
+	Fl_Check_Button* m_physical_shading_check;
+
 	// member functions
 	void show();
 
@@ -70,6 +72,7 @@ public:
 	bool		m_isTextureMap = false;
 	bool		m_isBumpMap = false;
 	bool		m_isSolidTexture = false;
+	bool		m_isPhysicalShade = false;
 
 	bool show_sample_visualize{ false };
 	bool jittering{ false };
@@ -85,6 +88,7 @@ public:
 	bool glossy{ false };
 	bool depth_of_field{ false };
 	double focal_length{ 1 };
+
 
 private:
 	RayTracer*	raytracer;
@@ -138,11 +142,13 @@ private:
 	static void cb_bvh_check(Fl_Widget* o, void* v);
 	static void cb_soft_shadow_check(Fl_Widget* o, void* v);
 	static void cb_height_field_check(Fl_Widget* o, void* v);
+	static void cb_physical_shade_check(Fl_Widget* o, void* v);
 	static void cb_motion_check(Fl_Widget* o, void* v);
 	static void cb_caustic_check(Fl_Widget* o, void* v);
 	static void cb_glossy_check(Fl_Widget* o, void* v);
 	static void cb_depth_field_check(Fl_Widget* o, void* v);
 	static void cb_focal_slides(Fl_Widget* o, void* v);
+
 };
 
 #endif

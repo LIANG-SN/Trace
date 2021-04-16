@@ -386,6 +386,13 @@ void TraceUI::cb_depth_field_check(Fl_Widget* o, void* v)
 	((TraceUI*)(o->user_data()))->depth_of_field = bool(((Fl_Check_Button*)o)->value());
 }
 
+void TraceUI::cb_physical_shade_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->m_isPhysicalShade = bool(((Fl_Check_Button*)o)->value());
+	((TraceUI*)(o->user_data()))->raytracer->m_isPhysicalShade = bool(((Fl_Check_Button*)o)->value());
+	((TraceUI*)(o->user_data()))->raytracer->setScenePhysicalShade();
+}
+
 void TraceUI::show()
 {
 	m_mainWindow->show();
@@ -594,6 +601,7 @@ TraceUI::TraceUI() {
 		m_height_field_check->user_data((void*)(this));
 		m_height_field_check->callback(cb_height_field_check);
 
+
 		//m_sample_slider = new Fl_Value_Slider(100, 270, 180, 20, "focal length");
 		//m_sample_slider->user_data((void*)(this));	// record self to be used by static callback functions
 		//m_sample_slider->type(FL_HOR_NICE_SLIDER);
@@ -605,6 +613,12 @@ TraceUI::TraceUI() {
 		//m_sample_slider->value(focal_length);
 		//m_sample_slider->align(FL_ALIGN_RIGHT);
 		//m_sample_slider->callback(cb_focal_slides);
+
+		m_physical_shading_check = new Fl_Check_Button(10, 290, 70, 20, "Physical Shading");
+		m_physical_shading_check->value(m_isPhysicalShade);
+		m_physical_shading_check->user_data((void*)(this));
+		m_physical_shading_check->callback(cb_physical_shade_check);
+
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);
