@@ -18,6 +18,19 @@
 
 #define PI acos(-1)
 
+double D_f(vec3f n, vec3f h,double m)
+{
+	double a = acos(n * h);
+	double cosa_4 = max(0.000001, pow(cos(a), 4.0));
+	return exp(-tan(a) * tan(a) / m / m) / (PI * m * m * cosa_4);
+}
+
+double G_f(vec3f n, vec3f h, vec3f l, vec3f v)
+{
+	double v_n = max(0.000001, (v * n));
+	return min(1, min(2 * (h * n) * (v * n) / v_n, 2 * (h * n) * (l * n) / v_n));
+}
+
 void sphereTextureMapAlgorithm(double& rx, double& ry, vec3f& local)
 {
 	vec3f Sp = vec3f(0, -1, 0);
@@ -166,15 +179,35 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 
 
 
-		    intensity[0] += (*iter)->shadowAttenuation(p)[0] * 
-		    	(*iter)->distanceAttenuation(p) * I_light[0] * 
-		    	(kd[0] * (1 - kt[0]) * max(0.0, (N.dot(L))) + ks[0] * pow(max(0.0, V.dot(R)), shininess * 128));
-			intensity[1] += (*iter)->shadowAttenuation(p)[1] *
-		    	(*iter)->distanceAttenuation(p) * I_light[1] *
-		    	(kd[1] * (1 - kt[1]) * max(0.0, (N.dot(L))) + ks[1] * pow(max(0.0, V.dot(R)), shininess * 128));
-		    intensity[2] += (*iter)->shadowAttenuation(p)[2] *
-		    	(*iter)->distanceAttenuation(p) * I_light[2] *
-		    	(kd[2] * (1 - kt[2]) * max(0.0, (N.dot(L))) + ks[2] * pow(max(0.0, V.dot(R)), shininess * 128));
+			if (scene->m_isPhysicalShade)
+			{
+				double fl = 1 / PI;
+				vec3f h = (V + L).normalize();
+				vec3f F = ks +  (1.0 - pow((V * h), 5.0))*(vec3f(1, 1, 1) - ks);
+				double D = D_f(N, h, m);
+				double G = G_f(N, h, L, V);
+				double n_h = max(0.000001, N * h);
+				double n_v = max(0.000001, N * V);
+
+				intensity[0] += (*iter)->shadowAttenuation(p)[0] * (*iter)->distanceAttenuation(p) * I_light[0] *
+					(kd[0] * (1 - kt[0]) * fl + ks[0] * F[0] * D * G / 4 / n_h / n_v);
+				intensity[1] += (*iter)->shadowAttenuation(p)[0] * (*iter)->distanceAttenuation(p) * I_light[0] *
+					(kd[1] * (1 - kt[1]) * fl + ks[1] * F[1] * D * G / 4 / n_h / n_v);
+				intensity[2] += (*iter)->shadowAttenuation(p)[0] * (*iter)->distanceAttenuation(p) * I_light[0] *
+					(kd[2] * (1 - kt[2]) * fl + ks[2] * F[2] * D * G / 4 / n_h / n_v);
+			}
+			else
+			{
+				intensity[0] += (*iter)->shadowAttenuation(p)[0] *
+					(*iter)->distanceAttenuation(p) * I_light[0] *
+					(kd[0] * (1 - kt[0]) * max(0.0, (N.dot(L))) + ks[0] * pow(max(0.0, V.dot(R)), shininess * 128));
+				intensity[1] += (*iter)->shadowAttenuation(p)[1] *
+					(*iter)->distanceAttenuation(p) * I_light[1] *
+					(kd[1] * (1 - kt[1]) * max(0.0, (N.dot(L))) + ks[1] * pow(max(0.0, V.dot(R)), shininess * 128));
+				intensity[2] += (*iter)->shadowAttenuation(p)[2] *
+					(*iter)->distanceAttenuation(p) * I_light[2] *
+					(kd[2] * (1 - kt[2]) * max(0.0, (N.dot(L))) + ks[2] * pow(max(0.0, V.dot(R)), shininess * 128));
+			}
 		}
 	}
 	return intensity;

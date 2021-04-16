@@ -366,6 +366,13 @@ void TraceUI::cb_height_field_check(Fl_Widget* o, void* v)
 	((TraceUI*)(o->user_data()))->height_field = bool(((Fl_Check_Button*)o)->value());
 }
 
+void TraceUI::cb_physical_shade_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->m_isPhysicalShade = bool(((Fl_Check_Button*)o)->value());
+	((TraceUI*)(o->user_data()))->raytracer->m_isPhysicalShade = bool(((Fl_Check_Button*)o)->value());
+	((TraceUI*)(o->user_data()))->raytracer->setScenePhysicalShade();
+}
+
 void TraceUI::show()
 {
 	m_mainWindow->show();
@@ -553,6 +560,12 @@ TraceUI::TraceUI() {
 		m_height_field_check->value(height_field);
 		m_height_field_check->user_data((void*)(this));
 		m_height_field_check->callback(cb_height_field_check);
+
+		m_physical_shading_check = new Fl_Check_Button(10, 280, 70, 20, "Physical Shading");
+		m_physical_shading_check->value(m_isPhysicalShade);
+		m_physical_shading_check->user_data((void*)(this));
+		m_physical_shading_check->callback(cb_physical_shade_check);
+
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);

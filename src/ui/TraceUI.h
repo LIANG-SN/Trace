@@ -49,6 +49,8 @@ public:
 	Fl_Check_Button* m_soft_shadow_check;
 	Fl_Check_Button* m_height_field_check;
 
+	Fl_Check_Button* m_physical_shading_check;
+
 	// member functions
 	void show();
 
@@ -65,6 +67,7 @@ public:
 	bool		m_isTextureMap = false;
 	bool		m_isBumpMap = false;
 	bool		m_isSolidTexture = false;
+	bool		m_isPhysicalShade = false;
 
 	bool show_sample_visualize{ false };
 	bool jittering{ false };
@@ -75,6 +78,7 @@ public:
 	bool use_bvh{ true };
 	bool soft_shadow{ false };
 	bool height_field{ false };
+
 
 private:
 	RayTracer*	raytracer;
@@ -128,6 +132,8 @@ private:
 	static void cb_bvh_check(Fl_Widget* o, void* v);
 	static void cb_soft_shadow_check(Fl_Widget* o, void* v);
 	static void cb_height_field_check(Fl_Widget* o, void* v);
+	static void cb_physical_shade_check(Fl_Widget* o, void* v);
+
 };
 
 #endif

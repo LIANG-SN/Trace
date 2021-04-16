@@ -267,6 +267,8 @@ public:
 	bool		   m_isBumpMap = false;
 	bool		   m_isSolidTexture = false;
 
+	bool		   m_isPhysicalShade = false;
+
 public:
 	Scene() 
 		: transformRoot(), objects(), lights() {}

@@ -54,11 +54,16 @@ public:
 	bool		   m_isTextureMap = false;
 	bool		   m_isBumpMap = false;
 	bool		   m_isSolidTexture = false;
+	bool		   m_isPhysicalShade = false;
 	// bool sample_visualize();
 
 	void setSceneBumpMap();
 	void setSceneTextureMap();
 	void setSceneSolidTexture();
+	void setScenePhysicalShade()
+	{
+		scene->m_isPhysicalShade = m_isPhysicalShade;
+	};
 private:
 	unsigned char *buffer;
 	unsigned char* visualize_sample_buffer;
