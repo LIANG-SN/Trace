@@ -64,6 +64,8 @@ public:
 	{
 		scene->m_isPhysicalShade = m_isPhysicalShade;
 	};
+	void initCaustic();
+	vec3f tracePhoton(const ray& r);
 private:
 	unsigned char *buffer;
 	unsigned char* visualize_sample_buffer;
@@ -72,6 +74,7 @@ private:
 	Scene *scene;
 
 	bool m_bSceneLoaded;
+	int photonMap[201][201] = { 0 }; // todo: generalize
 };
 
 #endif // __RAYTRACER_H__
