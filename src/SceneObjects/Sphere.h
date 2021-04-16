@@ -13,6 +13,7 @@ public:
 	}
     
 	virtual bool intersectLocal( const ray& r, isect& i ) const;
+	virtual bool csg_intersectLocal(const ray& r, isect& max_t, isect& min_t) const;
 	virtual bool hasBoundingBoxCapability() const { return true; }
 
     virtual BoundingBox ComputeLocalBoundingBox()

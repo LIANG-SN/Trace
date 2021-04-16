@@ -30,6 +30,7 @@ point_light
 
 }
 
+
 point_light
 {
 	position = (0, 2, 2);
@@ -37,99 +38,56 @@ point_light
 
 }
 
+scale(0.64,0.64,0.64,
+sphere {
+ material = { 
+  diffuse = (0, 0, 1);
+  specular = (0.9,0.4,0.0);
+  shininess = 0.6;
+ }
+} )
 
-material{
-	
-	name = "#1";
-	diffuse=( 0.0,0.7,0.0);
-    ambient=( 0.2,0.2,0.2);
-    specular=( 0,0,0);
-    emissive=( 0,0,0);
-    shininess=0.2;
-    transmissive=( 0,0,0 );
+box { 
+ material = { 
+   diffuse = (1,0.3,0.1);
+   specular = (0.9,0.4,0.0);
+   shininess = 0.6;
+  }
 }
 
-material{
-	
-	name = "#2";
-	diffuse=( 0.8,0.0,0.0);
-    ambient=( 0.2,0.2,0.2);
-    specular=( 0,0,0);
-    emissive=( 0,0,0);
-    shininess=0.2;
-    transmissive=( 0,0,0 );
-}
+scale(1.1,0.5,0.5,
+box { 
+	material = { 
+			diffuse = (0,1,0);
+			specular = (0.9,0.4,0.0);
+			shininess = 0.6;
+		}
+})	
 
-material{
-	
-	name = "#3";
-	diffuse=( 0.0,0.0,0.8);
-    ambient=( 0.2,0.2,0.2);
-    specular=( 0,0,0);
-    emissive=( 0,0,0);
-    shininess=0.2;
-    transmissive=( 0,0,0 );
-}
+scale(0.5,1.1,0.5,
+box { 
+	material = { 
+			diffuse = (0,1,0);
+			specular = (0.9,0.4,0.0);
+			shininess = 0.6;
+		}
+})
 
-material{
-	
-	name = "#4";
-	diffuse=( 0.8,0.8,0.0);
-    ambient=( 0.2,0.2,0.2);
-    specular=( 0,0,0);
-    emissive=( 0,0,0);
-    shininess=0.2;
-    transmissive=( 0,0,0 );
-}
+scale(0.5,0.5,1.1,
+box { 
+	material = { 
+			diffuse = (0,1,0);
+			specular = (0.9,0.4,0.0);
+			shininess = 0.6;
+		}
+})
 
-material{
-	
-	name = "#5";
-	diffuse=( 0.8,0.8,0.8);
-    ambient=( 0.2,0.2,0.2);
-    specular=( 0,0,0);
-    emissive=( 0,0,0);
-    shininess=0.2;
-    transmissive=( 0,0,0 );
-}
 
+//In operation (a,b,c), a,c is the index of the object and b is the instruction. Each tuple only have 3 items in order to form a tree structure.
 
 csg{
-	primitiveNumber = 5;
-	
-	
-
-	queue0 = ("scale","box");
-	scale0 = (1.5,1.5,1.5);
-	primitive0 = "box";
-	materialID0 = "#5";
-
-	queue1 = ("sphere");
-	primitive1 = "sphere";
-	materialID1 = "#1";
-
-	
-
-	queue2 = ("translate","scale","cylinder");
-	translate2 = (0,0,-0.5);
-	scale2 = (0.5,0.5,3.0);
-	primitive2 = "cylinder";
-	materialID2 = "#3";
-
-	queue3 = ("translate","scale","rotate","cylinder");
-	translate3 = (0,0,-0.5);
-	scale3 = (0.5,0.5,3.0);
-	rotate3 = (0,1,0,1.57);
-	primitive3 = "cylinder";
-	materialID3 = "#4";
-
-	queue4 = ("translate","scale","rotate","cylinder");
-	translate4 = (0,0,-0.5);
-	scale4 = (0.5,0.5,3.0);
-	rotate4 = (1,0,0,1.57);
-	primitive4 = "cylinder";
-	materialID4 = "#2";
-
-	operator = ((0,"intersect",1),"minus",((2,"union",3),"union",4));
-
+	operations=((0,"intersect",1),"minus",((2,"union",3),"union",4));
+				material = { 
+					diffuse = (1,1,1);
+				}
 }

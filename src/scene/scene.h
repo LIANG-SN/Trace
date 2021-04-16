@@ -139,10 +139,12 @@ class Geometry
 public:
     // intersections performed in the global coordinate space.
     virtual bool intersect(const ray&r, isect&i) const;
+	virtual bool csg_intersect(const ray& r, isect& min_t , isect& max_t) const;
     
     // intersections performed in the object's local coordinate space
     // do not call directly - this should only be called by intersect()
 	virtual bool intersectLocal( const ray& r, isect& i ) const;
+	virtual bool csg_intersectLocal(const ray& r, isect& min_t , isect& max_t) const;
 
 	TransformNode* getTransform() { return transform; };
 	virtual bool hasBoundingBoxCapability() const;
@@ -195,7 +197,7 @@ public:
     void setTransform(TransformNode *transform) { this->transform = transform; };
     
 	Geometry( Scene *scene ) 
-		: SceneElement( scene ) {}
+		: SceneElement( scene ) {};
 
 protected:
 	BoundingBox bounds;
@@ -288,6 +290,12 @@ public:
 	}
 	list<Geometry*>::const_iterator endBoundedobjects() const {
 		return boundedobjects.end();
+	}
+	list<Geometry*>::const_iterator beginObjects() const {
+		return objects.begin();
+	}
+	list<Geometry*>::const_iterator endObjects() const {
+		return objects.end();
 	}
 	Camera *getCamera() { return &camera; }
 	void getGradientOfPoint(const int x, const int y, int& Gx, int& Gy);
