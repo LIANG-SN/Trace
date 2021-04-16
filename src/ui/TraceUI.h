@@ -50,6 +50,7 @@ public:
 	Fl_Check_Button* m_height_field_check;
 	Fl_Check_Button* m_motion_check;
 	Fl_Check_Button* m_caustic_check;
+	Fl_Check_Button* m_glossy_check;
 
 	// member functions
 	void show();
@@ -79,6 +80,7 @@ public:
 	bool height_field{ false };
 	bool motion{ false };
 	bool caustic{ false };
+	bool glossy{ false };
 
 private:
 	RayTracer*	raytracer;
@@ -134,6 +136,7 @@ private:
 	static void cb_height_field_check(Fl_Widget* o, void* v);
 	static void cb_motion_check(Fl_Widget* o, void* v);
 	static void cb_caustic_check(Fl_Widget* o, void* v);
+	static void cb_glossy_check(Fl_Widget* o, void* v);
 };
 
 #endif

@@ -373,6 +373,10 @@ void TraceUI::cb_caustic_check(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->caustic = bool(((Fl_Check_Button*)o)->value());
 }
+void TraceUI::cb_glossy_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->glossy = bool(((Fl_Check_Button*)o)->value());
+}
 
 void TraceUI::show()
 {
@@ -561,6 +565,11 @@ TraceUI::TraceUI() {
 		m_motion_check->value(motion);
 		m_motion_check->user_data((void*)(this));
 		m_motion_check->callback(cb_motion_check);
+
+		m_glossy_check = new Fl_Check_Button(200, 230, 70, 20, "Glossy reflect");
+		m_glossy_check->value(glossy);
+		m_glossy_check->user_data((void*)(this));
+		m_glossy_check->callback(cb_glossy_check);
 
 		m_caustic_check = new Fl_Check_Button(110, 250, 70, 20, "Caustic");
 		m_caustic_check->value(caustic);

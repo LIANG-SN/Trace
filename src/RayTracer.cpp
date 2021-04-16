@@ -105,15 +105,35 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// reflection
 		if (refrac_stack.empty() && (m.kr[0] > 0 || m.kr[1] > 0 || m.kr[2] > 0))
 		{
-		    vec3f reflectDirection = 
-		    	 - (2 * (rayDirection.dot(N)) * N - rayDirection).normalize();
-		    ray reflectRay(r.at(i.t), reflectDirection);
-		    vec3f reflect = traceRay(scene, reflectRay,  thresh, depth + 1,x,y);
-			vec3f kr_reflect = m.kr.multiply(reflect);
-			if (kr_reflect[0] > thresh[0] || kr_reflect[1] > thresh[1] || kr_reflect[2] > thresh[2])
-				finalI += m.kr.multiply(reflect);
+			if (traceUI->glossy)
+			{
+				// 1.5 to 2.5
+				vec3f average(0.0, 0.0, 0.0);
+				for (int k = 0; k < 11; k++)
+				{
+					double scale = (k - 5) / 10.0 / 5; // (-0.5, 0.5)
+					// distributed direction
+					vec3f reflectDirection =
+						-((2 + scale) * (rayDirection.dot(N)) * N - rayDirection).normalize();
+					ray reflectRay(r.at(i.t), reflectDirection);
+					vec3f reflect = traceRay(scene, reflectRay, thresh, depth + 1, x, y);
+					vec3f kr_reflect = m.kr.multiply(reflect);
+					average += m.kr.multiply(reflect);
+				}
+				finalI += average / 11;
+			}
 			else
-				return finalI;
+			{
+		        vec3f reflectDirection = 
+		        	 - (2 * (rayDirection.dot(N)) * N - rayDirection).normalize();
+		        ray reflectRay(r.at(i.t), reflectDirection);
+		        vec3f reflect = traceRay(scene, reflectRay,  thresh, depth + 1,x,y);
+			    vec3f kr_reflect = m.kr.multiply(reflect);
+			    if (kr_reflect[0] > thresh[0] || kr_reflect[1] > thresh[1] || kr_reflect[2] > thresh[2])
+			    	finalI += m.kr.multiply(reflect);
+			    else
+			    	return finalI;
+			}
 		}
 		// refraction
 		//cou//t << m.kt[0] << endl;
