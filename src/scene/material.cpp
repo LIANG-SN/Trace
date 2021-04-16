@@ -39,6 +39,7 @@ void squareTextureMapAlgorithm(double& rx, double& ry, vec3f& local)
 
 vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 {
+	
 	// YOUR CODE HERE
 
 	// For now, this method just returns the diffuse color of the object.
@@ -55,6 +56,7 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	vec3f p = r.at(i.t);
 	intensity += ke;
 	int c = 0;
+
 	for (Scene::cliter iter = scene->beginLights(); iter != scene->endLights(); iter++)
 	{
 		vec3f I_light = (*iter)->getColor(p);
@@ -96,10 +98,11 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 				N += rate*Gy / 255.0 * d_y;
 			}
 			
-
+			
 			vec3f R = (2 * (L.dot(N)) * N - L).normalize();
 			vec3f V = (scene->getCamera()->getEye() - p).normalize();
 			vec3f kd = this->kd;
+
 
 			if (scene->m_isTextureMap && scene->m_nTextureMap != NULL)
 			{
@@ -107,7 +110,6 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 				vec3f local = obj_ptr->getTransform()->globalToLocalCoords(r.at(i.t));
 
 				double rx, ry;
-
 
 				if (dynamic_cast<Sphere*>(obj_ptr))
 					sphereTextureMapAlgorithm(rx, ry, local);
@@ -162,10 +164,12 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 				kd = vec3f(r / 3 / 255.0, g / 3 / 255.0, b / 3 / 255.0);
 			}
 
+
+
 		    intensity[0] += (*iter)->shadowAttenuation(p)[0] * 
 		    	(*iter)->distanceAttenuation(p) * I_light[0] * 
 		    	(kd[0] * (1 - kt[0]) * max(0.0, (N.dot(L))) + ks[0] * pow(max(0.0, V.dot(R)), shininess * 128));
-		    intensity[1] += (*iter)->shadowAttenuation(p)[1] *
+			intensity[1] += (*iter)->shadowAttenuation(p)[1] *
 		    	(*iter)->distanceAttenuation(p) * I_light[1] *
 		    	(kd[1] * (1 - kt[1]) * max(0.0, (N.dot(L))) + ks[1] * pow(max(0.0, V.dot(R)), shininess * 128));
 		    intensity[2] += (*iter)->shadowAttenuation(p)[2] *

@@ -3,6 +3,7 @@
 #include "scene.h"
 #include "light.h"
 #include "../ui/TraceUI.h"
+#include "../SceneObjects/CSG.h"
 extern TraceUI* traceUI;
 void BoundingBox::operator=(const BoundingBox& target)
 {
@@ -94,7 +95,36 @@ bool Geometry::intersect(const ray&r, isect&i) const
     } 
 }
 
+bool Geometry::csg_intersect(const ray& r, isect& min_t, isect& max_t) const
+{
+	vec3f pos = transform->globalToLocalCoords(r.getPosition());
+	vec3f dir = transform->globalToLocalCoords(r.getPosition() + r.getDirection()) - pos;
+	double length = dir.length();
+	dir /= length;
+
+	ray localRay(pos, dir);
+
+	if (csg_intersectLocal(localRay, min_t, max_t)) {
+		// Transform the intersection point & normal returned back into global space.
+		min_t.N = transform->localToGlobalCoordsNormal(min_t.N);
+		min_t.t /= length;
+
+		max_t.N = transform->localToGlobalCoordsNormal(max_t.N);
+		max_t.t /= length;
+
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 bool Geometry::intersectLocal( const ray& r, isect& i ) const
+{
+	return false;
+}
+
+bool Geometry::csg_intersectLocal(const ray& r, isect& min_t, isect& max_t) const
 {
 	return false;
 }
@@ -145,6 +175,19 @@ bool Scene::intersect( const ray& r, isect& i ) const
 	isect cur;
 	bool have_one = false;
 
+	iter last = objects.end();
+	last--;
+	if (dynamic_cast<CSG*>(*last))
+	{
+		if ((*last)->intersect(r, cur)) {
+			if (!have_one || (cur.t < i.t)) {
+				i = cur;
+				have_one = true;
+			}
+		}
+		return have_one;
+	}
+
 	// try the non-bounded objects
 	for( j = nonboundedobjects.begin(); j != nonboundedobjects.end(); ++j ) {
 		if( (*j)->intersect( r, cur ) ) {
@@ -169,6 +212,7 @@ bool Scene::intersect( const ray& r, isect& i ) const
 	  			have_one = true;
 	  		}
 	  	}
+
 	  }
 	}
 

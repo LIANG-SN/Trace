@@ -141,3 +141,178 @@ bool Cylinder::intersectCaps( const ray& r, isect& i ) const
 
 	return false;
 }
+
+
+
+//bool Cylinder::csg_intersectLocal(const ray& r, isect& min_t, isect& max_t) const
+//{
+//
+//	min_t.obj = this;
+//	max_t.obj = this;
+//	isect i;
+//	if (csg_intersectBody(r, min_t,max_t)) {
+//		vec3f inter1 = r.at(min_t.t);
+//		vec3f inter2 = r.at(max_t.t);
+//		if (inter1[2] > 1 && inter2[2] > 1)
+//			return false;
+//		else if (inter1[2] < -1 && inter2[2] < -1)
+//			return false;
+//		else if(inter1[2] <= 1 && inter2[2]>1)
+//		{
+//			max_t.t= (1-r.getPosition()[2])/ r.getDirection()[2];
+//			max_t.N = vec3f(0, 0, 1);
+//		}
+//		else if
+//	}
+//
+//
+//}
+//
+//
+//bool Cylinder::csg_intersectBody(const ray& r, isect& min_t, isect& max_t) const
+//{
+//	double x0 = r.getPosition()[0];
+//	double y0 = r.getPosition()[1];
+//	double x1 = r.getDirection()[0];
+//	double y1 = r.getDirection()[1];
+//
+//	double a = x1 * x1 + y1 * y1;
+//	double b = 2.0 * (x0 * x1 + y0 * y1);
+//	double c = x0 * x0 + y0 * y0 - 1.0;
+//
+//	if (0.0 == a) {
+//		// This implies that x1 = 0.0 and y1 = 0.0, which further
+//		// implies that the ray is aligned with the body of the cylinder,
+//		// so no intersection.
+//		return false;
+//	}
+//
+//	double discriminant = b * b - 4.0 * a * c;
+//
+//	if (discriminant < 0.0) {
+//		return false;
+//	}
+//
+//	discriminant = sqrt(discriminant);
+//
+//	double t2 = (-b + discriminant) / (2.0 * a);
+//
+//	if (t2 <= RAY_EPSILON) {
+//		return false;
+//	}
+//
+//	double t1 = (-b - discriminant) / (2.0 * a);
+//
+//	if (t1 > RAY_EPSILON) {
+//		// Two intersections.
+//		vec3f P1 = r.at(t1);
+//		vec3f P2 = r.at(t2);
+//		double z1 = P1[2];
+//		double z2 = P2[2];
+//		if (z2 >= 0.0 && z2 <= 1.0) {
+//			// It's okay.
+//			min_t.t = t1;
+//			min_t.N = vec3f(P1[0], P1[1], 0.0).normalize();
+//			max_t.t = t2;
+//			max_t.N = vec3f(P2[0], P2[1], 0.0).normalize();
+//			return true;
+//		}
+//	}
+//
+//
+//	return false;
+//}
+//
+//bool Cylinder::csg_intersectCaps(const ray& r, isect& min_t, isect& max_t) const
+//{
+//	if (!capped) {
+//		return false;
+//	}
+//
+//	double pz = r.getPosition()[2];
+//	double dz = r.getDirection()[2];
+//
+//	if (0.0 == dz) {
+//		return false;
+//	}
+//
+//	double t1;
+//	double t2;
+//
+//	t1 = (1.0 - pz) / dz;
+//	t2= (-1.0 - pz) / dz;
+//	if (t1 >= RAY_EPSILON && t2< RAY_EPSILON)
+//	{
+//		vec3f inter = r.at(t1);
+//		if (inter[0] * inter[0] + inter[1] * inter[1] < 1)
+//		{
+//			min_t.t = t1;
+//			min_t.N = vec3f(0, 0, 1).normalize();
+//			max_t.t = 0;
+//			return true;
+//		}
+//		return false;
+//	}
+//	else if (t1 < RAY_EPSILON && t2>=RAY_EPSILON)
+//	{
+//		vec3f inter = r.at(t2);
+//		if (inter[0] * inter[0] + inter[1] * inter[1] < 1)
+//		{
+//			min_t.t = t2;
+//			min_t.N = vec3f(0, 0, 1).normalize();
+//			max_t.t = 0;
+//			return true;
+//		}
+//		return false;
+//	}
+//	else if (t1 >= RAY_EPSILON && t2 >= RAY_EPSILON)
+//	{
+//		if (t1 < t2)
+//		{
+//
+//		}
+//	}
+//
+//	if (dz > 0.0) {
+//		t1 = (-pz) / dz;
+//		t2 = (1.0 - pz) / dz;
+//	}
+//	else {
+//		t1 = (1.0 - pz) / dz;
+//		t2 = (-pz) / dz;
+//	}
+//
+//	if (t2 < RAY_EPSILON) {
+//		return false;
+//	}
+//
+//	if (t1 >= RAY_EPSILON) {
+//		vec3f p(r.at(t1));
+//		if ((p[0] * p[0] + p[1] * p[1]) <= 1.0) {
+//			i.t = t1;
+//			if (dz > 0.0) {
+//				// Intersection with cap at z = 0.
+//				i.N = vec3f(0.0, 0.0, -1.0);
+//			}
+//			else {
+//				i.N = vec3f(0.0, 0.0, 1.0);
+//			}
+//			return true;
+//		}
+//	}
+//
+//	vec3f p(r.at(t2));
+//	if ((p[0] * p[0] + p[1] * p[1]) <= 1.0) {
+//		i.t = t2;
+//		if (dz > 0.0) {
+//			// Intersection with cap at z = 1.
+//			i.N = vec3f(0.0, 0.0, 1.0);
+//		}
+//		else {
+//			i.N = vec3f(0.0, 0.0, -1.0);
+//		}
+//		return true;
+//	}
+//
+//	return false;
+//}

@@ -22,6 +22,8 @@
 #include "../SceneObjects/Paraboloid.h"
 #include "../SceneObjects/Hyperbolic.h"
 #include "../scene/light.h"
+#include "../SceneObjects/Metaball.h"
+#include "../SceneObjects/CSG.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -42,6 +44,10 @@ static void processCamera( Obj *child, Scene *scene );
 static Material *getMaterial( Obj *child, const mmap& bindings );
 static Material *processMaterial( Obj *child, mmap *bindings = NULL );
 static void verifyTuple( const mytuple& tup, size_t size );
+
+static void addBallToMetaballs(Obj* child, Metaball* mball);
+static void addOperationsToCSG(Obj* child, Instruction* instr);
+
 
 Scene *readScene( const string& filename )
 {
@@ -230,6 +236,7 @@ static void verifyTuple( const mytuple& tup, size_t size )
 static void processGeometry( string name, Obj *child, Scene *scene,
 	const mmap& materials, TransformNode *transform )
 {
+	
 	if( name == "translate" ) {
 		const mytuple& tup = child->getTuple();
 		verifyTuple( tup, 4 );
@@ -372,7 +379,7 @@ static void processGeometry( string name, Obj *child, Scene *scene,
         mat = getMaterial(getField( child, "material" ), materials );
         //else
         //    mat = new Material();
-
+		//cout << 2 << endl;
 		if( name == "sphere" ) {
 			obj = new Sphere( scene, mat );
 		} else if( name == "box" ) {
@@ -399,7 +406,14 @@ static void processGeometry( string name, Obj *child, Scene *scene,
 		else if (name == "hyperbolic") {
 			obj = new Hyperbolic(scene, mat);
 		}
-		
+		else if (name == "metaball") {
+			obj = new Metaball(scene, mat);
+			addBallToMetaballs(getField(child, "balls"), dynamic_cast<Metaball*>(obj));
+		}
+		else if (name == "csg") {
+			obj = new CSG(scene, mat);
+			addOperationsToCSG(getField(child, "operations"), dynamic_cast<CSG*>(obj)->instr);
+		}
 
 
         obj->setTransform(transform);
@@ -663,7 +677,9 @@ static void processObject( Obj *obj, Scene *scene, mmap& materials )
                 name == "polymesh" ||
 				name == "paraboloid" ||
 				name == "hyperbolic" ||
-				name == "particle") { // polymesh is for backwards compatibility.
+				name == "metaball" ||
+				name == "particle" ||
+				name == "csg") { // polymesh is for backwards compatibility.
 		processGeometry( name, child, scene, materials, &scene->transformRoot);
 		//scene->add( geo );
 	} else if( name == "material" ) {
@@ -672,5 +688,60 @@ static void processObject( Obj *obj, Scene *scene, mmap& materials )
 		processCamera( child, scene );
 	} else {
 		throw ParseError( string( "Unrecognized object: " ) + name );
+	}
+}
+
+static void addBallToMetaballs(Obj* child, Metaball* mball)
+{
+	mytuple balls = child->getTuple();
+	for (mytuple::iterator i = balls.begin(); i != balls.end(); i++)
+	{
+		mytuple ball = (*i)->getTuple();
+		double r = ball[0]->getScalar();
+		vec3f p = vec3f(ball[1]->getScalar(), ball[2]->getScalar(), ball[3]->getScalar());
+		mball->addBall(p, r);
+	}
+}
+
+static void addOperationsToCSG(Obj* child, Instruction* instr)
+{
+	mytuple t = child->getTuple();
+	if (t[0]->getTypeName() == "scalar")
+	{
+		//cout << t[0]->getScalar() << endl;
+		instr->obj1 = t[0]->getScalar();
+		instr->is1Object = true;
+	}
+	else
+	{
+		instr->oper1 = new Instruction();
+		addOperationsToCSG(t[0], instr->oper1);
+	}
+
+	//cout << t[1]->getString() << endl;
+	if (t[1]->getString() == "intersect")
+	{
+		instr->operation = 0;
+	}
+	else if (t[1]->getString() == "union")
+	{
+		instr->operation = 1;
+	}
+	else if (t[1]->getString() == "minus")
+	{
+		instr->operation = 2;
+	}
+
+
+	if (t[2]->getTypeName() == "scalar")
+	{
+		//cout<< t[2]->getScalar()<<endl;
+		instr->obj2 = t[2]->getScalar();
+		instr->is2Object = true;
+	}
+	else
+	{
+		instr->oper2 = new Instruction();
+		addOperationsToCSG(t[2], instr->oper2);
 	}
 }
