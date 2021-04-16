@@ -33,7 +33,7 @@ vec3f RayTracer::trace( Scene *scene, double x, double y,int i,int j )
 		refrac_stack.pop();
 	double thres = traceUI->getThreshold();
 
-	if (true) // motion
+	if (traceUI->motion) // motion blur
 	{
 		vec3f average(0, 0, 0);
 		for (int i = 0; i < 5; i++)
@@ -85,8 +85,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		vec3f finalI = shade;
 
 
-		bool caustic = false;
-		if (caustic && m.kt[0] == 0) //caustic
+		if (traceUI->caustic && m.kt[0] == 0)
 		{
 			vec3f p = r.at(i.t);
 			if (p[0]*p[0] + p[1] * p[1] <= 1)
@@ -298,8 +297,7 @@ bool RayTracer::loadScene( char* fn )
 	scene->initScene();
 	
 	// init caustic (after init bvh)
-	bool caustic = false;
-	if (caustic)
+	if (traceUI->caustic)
 		initCaustic();
 
 	// Add any specialized scene loading code here
@@ -370,7 +368,7 @@ void RayTracer::loadHeightField()
 	{
 		trimesh->addFace(i * 3, i * 3 + 1, i * 3 + 2);
 	}
-	cout << trimesh->faces.size() << endl;
+	// cout << trimesh->faces.size() << endl;
 	trimesh->generateNormals();
 
 	char* error;
@@ -544,7 +542,7 @@ vec3f RayTracer::tracePhoton(const ray& r)
 
 	}
 	else
-		cout << "photon disappear" << endl;
+		;// cout << "photon disappear" << endl;
 }
 void RayTracer::initCaustic()
 {

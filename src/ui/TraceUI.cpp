@@ -365,6 +365,14 @@ void TraceUI::cb_height_field_check(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->height_field = bool(((Fl_Check_Button*)o)->value());
 }
+void TraceUI::cb_motion_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->motion = bool(((Fl_Check_Button*)o)->value());
+}
+void TraceUI::cb_caustic_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->caustic = bool(((Fl_Check_Button*)o)->value());
+}
 
 void TraceUI::show()
 {
@@ -548,6 +556,16 @@ TraceUI::TraceUI() {
 		m_soft_shadow_check->value(soft_shadow);
 		m_soft_shadow_check->user_data((void*)(this));
 		m_soft_shadow_check->callback(cb_soft_shadow_check);
+
+		m_motion_check = new Fl_Check_Button(110, 230, 70, 20, "Motion Blur");
+		m_motion_check->value(motion);
+		m_motion_check->user_data((void*)(this));
+		m_motion_check->callback(cb_motion_check);
+
+		m_caustic_check = new Fl_Check_Button(110, 250, 70, 20, "Caustic");
+		m_caustic_check->value(caustic);
+		m_caustic_check->user_data((void*)(this));
+		m_caustic_check->callback(cb_caustic_check);
 
 		m_height_field_check = new Fl_Check_Button(10, 250, 70, 20, "Height field");
 		m_height_field_check->value(height_field);

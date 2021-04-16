@@ -23,21 +23,21 @@ public:
 	TraceUI();
 
 	// The FLTK widgets
-	Fl_Window*			m_mainWindow;
-	Fl_Menu_Bar*		m_menubar;
+	Fl_Window* m_mainWindow;
+	Fl_Menu_Bar* m_menubar;
 
-	Fl_Slider*			m_sizeSlider;
-	Fl_Slider*			m_depthSlider;
-	Fl_Slider*			m_thresholdSlider;
+	Fl_Slider* m_sizeSlider;
+	Fl_Slider* m_depthSlider;
+	Fl_Slider* m_thresholdSlider;
 
-	Fl_Button*			m_renderButton;
-	Fl_Button*			m_stopButton;
-	Fl_Check_Button*	m_checkBackgroundButton;
-	Fl_Check_Button*	m_checkTextureMapButton;
-	Fl_Check_Button*	m_checkBumpMapButton;
-	Fl_Check_Button*	m_checkSolidTextureButton;
+	Fl_Button* m_renderButton;
+	Fl_Button* m_stopButton;
+	Fl_Check_Button* m_checkBackgroundButton;
+	Fl_Check_Button* m_checkTextureMapButton;
+	Fl_Check_Button* m_checkBumpMapButton;
+	Fl_Check_Button* m_checkSolidTextureButton;
 
-	TraceGLWindow*		m_traceGlWindow;
+	TraceGLWindow* m_traceGlWindow;
 
 	Fl_Check_Button* m_visualize_check;
 	Fl_Check_Button* m_jittering_check;
@@ -48,11 +48,13 @@ public:
 	Fl_Check_Button* m_bvh_check;
 	Fl_Check_Button* m_soft_shadow_check;
 	Fl_Check_Button* m_height_field_check;
+	Fl_Check_Button* m_motion_check;
+	Fl_Check_Button* m_caustic_check;
 
 	// member functions
 	void show();
 
-	void		setRayTracer(RayTracer *tracer);
+	void		setRayTracer(RayTracer* tracer);
 
 	int			getSize();
 	int			getDepth();
@@ -75,6 +77,8 @@ public:
 	bool use_bvh{ true };
 	bool soft_shadow{ false };
 	bool height_field{ false };
+	bool motion{ false };
+	bool caustic{ false };
 
 private:
 	RayTracer*	raytracer;
@@ -128,6 +132,8 @@ private:
 	static void cb_bvh_check(Fl_Widget* o, void* v);
 	static void cb_soft_shadow_check(Fl_Widget* o, void* v);
 	static void cb_height_field_check(Fl_Widget* o, void* v);
+	static void cb_motion_check(Fl_Widget* o, void* v);
+	static void cb_caustic_check(Fl_Widget* o, void* v);
 };
 
 #endif
