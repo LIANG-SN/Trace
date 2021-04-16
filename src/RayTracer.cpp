@@ -33,8 +33,19 @@ vec3f RayTracer::trace( Scene *scene, double x, double y,int i,int j )
 		refrac_stack.pop();
 	double thres = traceUI->getThreshold();
 
-
-	return traceRay( scene, r, vec3f(thres, thres, thres), 0 , i, j ).clamp();
+	if (true) // motion
+	{
+		vec3f average(0, 0, 0);
+		for (int i = 0; i < 5; i++)
+		{
+		    vec3f p_ = r.getPosition() + vec3f(0.05 * i, 0.05 * i, 0.05 * i);
+		    ray r_ = ray(p_, r.getDirection());
+		    average += traceRay(scene, r_, vec3f(thres, thres, thres), 0, i, j).clamp();
+		}
+		return average / 5;
+	}
+	else
+		return traceRay( scene, r, vec3f(thres, thres, thres), 0 , i, j ).clamp();
 }
 
 // Do recursive ray tracing!  You'll want to insert a lot of code here
@@ -70,7 +81,21 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		//cout << shade[0] << endl;
 		if (depth >= traceUI->getDepth())
 			return shade;
-		vec3f finalI = 20*shade;
+		vec3f finalI = shade;
+
+		bool caustic = false;
+		if (caustic && m.kt[0] == 0) //caustic
+		{
+			vec3f p = r.at(i.t);
+			if (p[0]*p[0] + p[1] * p[1] <= 1)
+			{
+				int x_ = p[0] * 100 + 100;
+				int y_ = p[1] * 100 + 100;
+				// add photon to photon map
+				vec3f scale(1.0 / 2.5 , 0, 0);
+				finalI += scale * photonMap[x_][y_];
+			}
+		}
 
 
 		if (shade[0] < thresh[0] && shade[1] < thresh[1] && shade[2] < thresh[2])
@@ -266,9 +291,15 @@ bool RayTracer::loadScene( char* fn )
 	if (traceUI->height_field && m_nHeight_field)
 		loadHeightField();
 
+
 	// separate objects into bounded and unbounded
 	scene->initScene();
 	
+	// init caustic (after init bvh)
+	bool caustic = false;
+	if (caustic)
+		initCaustic();
+
 	// Add any specialized scene loading code here
 	
 	m_bSceneLoaded = true;
@@ -466,4 +497,77 @@ void RayTracer::tracePixel( int i, int j )
 	pixel[1] = (int)(255.0 * col[1]);
 	pixel[2] = (int)(255.0 * col[2]);
 
+}
+
+vec3f RayTracer::tracePhoton(const ray& r)
+{
+	isect i;
+
+	if (scene->intersect(r, i))
+	{
+		const Material& m = i.getMaterial();
+		vec3f rayDirection = r.getDirection().normalize();
+		vec3f N = i.N.normalize();
+
+		// refraction
+		if (m.kt[0] != 0 || m.kt[1] != 0 || m.kt[2] != 0)
+		{
+			double n_i, n_t;
+			if (rayDirection.dot(N) <= 0) // enter an object
+			{
+				n_i = 1;
+				n_t = m.index;
+			}
+			else // exit an object
+			{
+				n_i = m.index;
+				n_t = 1;
+				N *= -1;
+			}
+			double n = n_i / n_t;
+			double cos_theta_i = N.dot(-rayDirection);
+			if (1 - n * n * (1 - cos_theta_i * cos_theta_i) > 0)
+			{
+				double cos_theta_t = sqrt(1 - n * n * (1 - cos_theta_i * cos_theta_i));
+				vec3f refracDir = ((n * cos_theta_i - cos_theta_t) * N - n * -rayDirection).normalize();
+				ray refracRay(r.at(i.t), refracDir);
+				return tracePhoton(refracRay);
+			}
+			else
+				return vec3f(0, 0, 10); // exception
+
+		}
+		else
+			return r.at(i.t);
+
+	}
+	else
+		cout << "photon disappear" << endl;
+}
+void RayTracer::initCaustic()
+{
+	int numPhoton = 200; // 20x20
+	int z = 2;
+	int strange_photon = 0;
+	for (int i = 0; i < numPhoton; i++)
+	{
+		for (int j = 0; j < numPhoton; j++)
+		{
+			double x = -1 + (double)i / numPhoton * 2;
+			double y = -1 + (double)j / numPhoton * 2;
+			vec3f p(x, y, z);
+			vec3f dir(0, 0, -1);
+			vec3f map_pos = tracePhoton(ray(p, dir));
+			// cout << map_pos[0] << "," << map_pos[1] << endl;
+			if (abs(map_pos[0]) <= 1 && abs(map_pos[1]) <= 1 && map_pos[2] != 10)
+			{
+				int x_ = map_pos[0] * 100 + 100;
+				int y_ = map_pos[1] * 100 + 100;
+				// add photon to photon map
+				photonMap[x_][y_]++;
+			}
+			else
+				strange_photon++;
+		}
+	}
 }

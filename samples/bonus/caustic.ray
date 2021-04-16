@@ -1,0 +1,41 @@
+SBT-raytracer 1.0
+
+// cyl_cyl_refract.ray
+// Test the refraction term
+// Don't forget to increase the trace depth to >= 2!
+
+camera
+{
+	position = (10, 0, 16);
+	viewdir = (-1, 0, -2);
+	updir = (0, 0, 1);
+}
+
+directional_light
+{
+	direction = (0 , 0, -1);
+	color = (0.8, 0.8, 0.8);
+}
+
+
+translate( 0, 0, -3,
+	scale( 15, 15, 1, 
+		box {
+			material = { 
+				diffuse = (0.4, 0, 0); 
+				//specular = (0.5, 0.5, 0.5);
+				//reflective = (1, 1, 1);
+				shininess = 0.2;
+			}
+		} ) )
+
+
+// Sphere acts as a lens
+scale(1, 1, 1, sphere {
+	material = {
+		emissive = (0.05, 0, 0);
+		diffuse = (0.1, 0, 0);
+		transmissive = (0.9, 0.9, 0.9);
+		index = 1.5;
+	}
+} )
