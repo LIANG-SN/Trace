@@ -44,6 +44,32 @@ vec3f RayTracer::trace( Scene *scene, double x, double y,int i,int j )
 		}
 		return average / 5;
 	}
+	else if (traceUI->depth_of_field)
+	{
+		// vec3f t = scene->getCamera()->getLook();
+		//cout << t[0] << " " << t[1] << " " << t[2] << endl;
+		vec3f average(0, 0, 0);
+		for (int row = 0; row < 11; row++)
+		{
+			for (int col = 0; col < 11; col++)
+			{
+				double x_bias = (row - 5) / 10.0 / 50 ; // (-0.5, 0.5)
+				double y_bias = (col - 5) / 10.0 / 50;
+				Camera c = *(scene->getCamera());
+				vec3f bias(x_bias, y_bias, 0);
+				c.setEye(c.getEye() + bias);
+				//c.look[2] = -traceUI->focal_length;
+				//
+				/*double x_ = x - 0.5;
+				double y_ = y - 0.5;
+				vec3f dir = c.look + x * c.u + y * c.v;
+				r = ray(c.eye, dir.normalize());*/
+				c.rayThrough(x, y, r);
+				average += traceRay(scene, r, vec3f(thres, thres, thres), 0, i, j).clamp();
+			}
+		}
+		return average / 121;
+	}
 	else
 		return traceRay( scene, r, vec3f(thres, thres, thres), 0 , i, j ).clamp();
 }

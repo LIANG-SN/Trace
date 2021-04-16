@@ -353,6 +353,10 @@ void TraceUI::cb_adaptive_thresh_slides(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->adaptive_thresh = int(((Fl_Slider*)o)->value());
 }
+void TraceUI::cb_focal_slides(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->focal_length = int(((Fl_Slider*)o)->value());
+}
 void TraceUI::cb_bvh_check(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->use_bvh = bool(((Fl_Check_Button*)o)->value());
@@ -376,6 +380,10 @@ void TraceUI::cb_caustic_check(Fl_Widget* o, void* v)
 void TraceUI::cb_glossy_check(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->glossy = bool(((Fl_Check_Button*)o)->value());
+}
+void TraceUI::cb_depth_field_check(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->depth_of_field = bool(((Fl_Check_Button*)o)->value());
 }
 
 void TraceUI::show()
@@ -571,6 +579,11 @@ TraceUI::TraceUI() {
 		m_glossy_check->user_data((void*)(this));
 		m_glossy_check->callback(cb_glossy_check);
 
+		m_depth_field_check = new Fl_Check_Button(10, 270, 70, 20, "Depth of Field");
+		m_depth_field_check->value(depth_of_field);
+		m_depth_field_check->user_data((void*)(this));
+		m_depth_field_check->callback(cb_depth_field_check);
+
 		m_caustic_check = new Fl_Check_Button(110, 250, 70, 20, "Caustic");
 		m_caustic_check->value(caustic);
 		m_caustic_check->user_data((void*)(this));
@@ -580,6 +593,18 @@ TraceUI::TraceUI() {
 		m_height_field_check->value(height_field);
 		m_height_field_check->user_data((void*)(this));
 		m_height_field_check->callback(cb_height_field_check);
+
+		//m_sample_slider = new Fl_Value_Slider(100, 270, 180, 20, "focal length");
+		//m_sample_slider->user_data((void*)(this));	// record self to be used by static callback functions
+		//m_sample_slider->type(FL_HOR_NICE_SLIDER);
+		//m_sample_slider->labelfont(FL_COURIER);
+		//m_sample_slider->labelsize(12);
+		//m_sample_slider->minimum(0.5);
+		//m_sample_slider->maximum(5);
+		//m_sample_slider->step(0.1);
+		//m_sample_slider->value(focal_length);
+		//m_sample_slider->align(FL_ALIGN_RIGHT);
+		//m_sample_slider->callback(cb_focal_slides);
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);

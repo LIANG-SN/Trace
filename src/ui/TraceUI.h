@@ -51,6 +51,8 @@ public:
 	Fl_Check_Button* m_motion_check;
 	Fl_Check_Button* m_caustic_check;
 	Fl_Check_Button* m_glossy_check;
+	Fl_Check_Button* m_depth_field_check;
+	Fl_Slider* m_focal_Slider;
 
 	// member functions
 	void show();
@@ -81,6 +83,8 @@ public:
 	bool motion{ false };
 	bool caustic{ false };
 	bool glossy{ false };
+	bool depth_of_field{ false };
+	double focal_length{ 1 };
 
 private:
 	RayTracer*	raytracer;
@@ -137,6 +141,8 @@ private:
 	static void cb_motion_check(Fl_Widget* o, void* v);
 	static void cb_caustic_check(Fl_Widget* o, void* v);
 	static void cb_glossy_check(Fl_Widget* o, void* v);
+	static void cb_depth_field_check(Fl_Widget* o, void* v);
+	static void cb_focal_slides(Fl_Widget* o, void* v);
 };
 
 #endif
